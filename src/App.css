@@ -182,3 +182,41 @@
     border-right-color: var(--border);
   }
 }
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #F6BABA;
+}
+
+.logo {
+  flex: 2;
+}
+
+.language-select {
+  flex: 1;
+}
+
+.select {
+  background-color: transparent;
+  border-color: transparent;
+  font-size: 120%;
+}
+
+.current-langs {
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.flag {
+  height: 30px;
+  width: 50px;
+}
+
+.large-icons {
+  width: 30px;
+  height: 30px;
+}
