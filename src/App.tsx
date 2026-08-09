@@ -6,6 +6,7 @@ import './App.css'
 
 import { Navbar } from './components/navbar'
 import { SongCard } from './components/SongCard'
+import { SearchBar } from './components/SearchBar'
 import song_list from './song_list.json'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   return (
     <>
       <Navbar />
+      <SearchBar />
       <section id="center">
         <div className="songs-list">
           {song_list.map((song) => (

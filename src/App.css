@@ -132,3 +132,10 @@
   width: 95%;
   max-width: 1200px;
 }
+
+.search {
+  width: 95%;
+  height: 30px;
+  margin: 1rem;
+  border-radius: 20px;
+}
