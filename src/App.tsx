@@ -5,6 +5,8 @@ import heroImg from './assets/hero.png'
 import './App.css'
 
 import { Navbar } from './components/navbar'
+import { SongCard } from './components/SongCard'
+import song_list from './song_list.json'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -13,17 +15,20 @@ function App() {
     <>
       <Navbar />
       <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+        <div className="songs-list">
+          {song_list.map((song) => (
+            <SongCard
+              key={song.title}
+              title={song.title}
+              eng_title={song.eng_title}
+              artist={song.artist}
+              img={song.img}
+              language={song.language}
+            >
+            </SongCard>
+          ))}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+
         <button
           type="button"
           className="counter"
