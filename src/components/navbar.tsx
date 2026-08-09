@@ -1,14 +1,35 @@
+import { useState } from "react";
 import { IoSearch, IoArrowForward} from "react-icons/io5";
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import { FormControl } from "@mui/material";
 
 export function Navbar() {
+    const [language, setLanguage] = useState("Chinese")
+
+    const handleChange = (event: SelectChangeEvent) => {
+        setLanguage(event.target.value as string);
+    }
+
     return (
         <div className="navbar">
             <h1 className="logo">Learn With Lyrics</h1>
             
             <div className="language-select">
-                <select className="select">
-                    <option value="Chinese">Chinese</option>
-                </select>
+                <FormControl variant="standard">
+                    <Select className="select"
+                        id="demo-simple-select"
+                        value={language}            
+                        displayEmpty
+                        disableUnderline
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="Chinese">Chinese</MenuItem>
+                        <MenuItem value="Japanese">Japanese</MenuItem>
+                        <MenuItem value="Korean">Korean</MenuItem>
+                    </Select>
+                </FormControl>
+                
             </div>
             
 

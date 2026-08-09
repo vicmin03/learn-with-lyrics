@@ -200,6 +200,9 @@
 
 .select {
   background-color: transparent;
+}
+
+.select .MuiSelect-select {
   border-color: transparent;
   font-size: 120%;
 }
@@ -209,7 +212,6 @@
   justify-content: space-between;
   align-items: center;
 }
-
 
 .flag {
   height: 30px;
