@@ -1,8 +1,3 @@
-<!--
-Every PR must be attached to an issue and have tags.
-See instructions.md → GitHub for our conventions.
--->
-
 ## Description
 
 [Description of what was changed]
