@@ -1,5 +1,6 @@
 [
     {  
+        "id": 1,
         "title":"永不失聯的愛",
         "eng_title":"Unbreakable Love",
         "artist":"Eric Chou",
@@ -7,13 +8,15 @@
         "language":"Chinese"
     },
     {
+        "id": 2,
         "title": "如果可以",
         "eng_title":"Red Scarf",
         "artist":"WeiBird",
         "img":"/song_covers/red_scarf.jpg",
         "language":"Chinese"
     },
-        {
+    {
+        "id": 3,
         "title": "太陽與地球",
         "eng_title":"Sun and Earth",
         "artist":"Crowd Lu",

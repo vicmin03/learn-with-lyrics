@@ -103,7 +103,7 @@
   flex-direction: row;
   border: 1px solid grey;
   border-radius: 10px;
-  box-shadow: 8px 8px 5px;
+  box-shadow: 5px 5px 5px;
 
   overflow: hidden;
   min-width: 0;
@@ -143,4 +143,15 @@
   border-radius: 20px;
   border: 1px solid red;
 
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  
+}
+
+.card-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
