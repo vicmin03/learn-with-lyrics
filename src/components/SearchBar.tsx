@@ -2,20 +2,12 @@ import { useState, useEffect } from "react";
 import { TextField, InputAdornment } from "@mui/material";
 import { IoSearch } from "react-icons/io5";
 
-export function SearchBar () {
-    const [searchText, setSearchText] = useState("");
+interface SearchProps {
+    searchText: string,
+    handleSearch: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement, Element>
+}
 
-    const handleSubmit = () => {
-        return
-    }
-
-    useEffect(() => {
-        console.log(searchText)
-    }, [searchText])
-
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
-        setSearchText(e.target.value);
-    }
+export function SearchBar (props: SearchProps) {
 
     return (
         <>
@@ -24,8 +16,8 @@ export function SearchBar () {
                     className="search-bar"
                     id="outlined-basic"
                     variant="outlined"
-                    value={searchText}
-                    onChange={handleSearch}
+                    value={props.searchText}
+                    onChange={props.handleSearch}
                     sx={{
                         "& .MuiOutlinedInput-root": {
                         borderRadius: 30,
