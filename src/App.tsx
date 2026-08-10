@@ -1,22 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css'
 
 import { Navbar } from './components/navbar'
 import { SongCard } from './components/SongCard'
+import { SearchBar } from './components/SearchBar'
 import song_list from './song_list.json'
 
 function App() {
   const [count, setCount] = useState(0)
 
+  // control state of search bar and debouncing text
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("")
+
+  // add debounce of 5ms so only filters song after user stops typing 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500)
+    return () => clearTimeout(timer);
+  }, [searchText])
+
+  // handler for user input to search bar; passed down as prop into SearchBar component
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  }
+
+  // filter songs based on user input to search bar
+  const valid_songs = song_list.filter((song) => 
+    song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()))
+
+
   return (
     <>
       <Navbar />
+      <SearchBar searchText={searchText} handleSearch={handleSearch}/>
       <section id="center">
         <div className="songs-list">
-          {song_list.map((song) => (
+          {valid_songs.map((song) => (
             <SongCard
               key={song.title}
               title={song.title}
@@ -37,8 +58,6 @@ function App() {
           Count is {count}
         </button>
       </section>
-
-
 
     </>
   )

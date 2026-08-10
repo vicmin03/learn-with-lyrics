@@ -132,3 +132,15 @@
   width: 95%;
   max-width: 1200px;
 }
+
+.search {
+  margin: 1rem; 
+}
+
+.search-bar {
+  width: 95%;
+  height: 30px;
+  border-radius: 20px;
+  border: 1px solid red;
+
+}
