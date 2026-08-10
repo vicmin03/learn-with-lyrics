@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -12,17 +12,25 @@ import song_list from './song_list.json'
 function App() {
   const [count, setCount] = useState(0)
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("")
 
   // useEffect(() => {
   //   console.log(searchText)
   // }, [searchText])
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
-      setSearchText(e.target.value);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500)
+    return () => clearTimeout(timer);
+  }, [searchText])
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
   }
 
   const valid_songs = song_list.filter((song) => 
-    song.title.toLowerCase().includes(searchText.toLowerCase()) || song.eng_title.toLowerCase().includes(searchText.toLowerCase()))
+    song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()))
   
 
   return (
