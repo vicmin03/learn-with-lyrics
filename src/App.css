@@ -134,8 +134,13 @@
 }
 
 .search {
+  margin: 1rem; 
+}
+
+.search-bar {
   width: 95%;
   height: 30px;
-  margin: 1rem;
   border-radius: 20px;
+  border: 1px solid red;
+
 }

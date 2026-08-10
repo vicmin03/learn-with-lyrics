@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
+import { TextField, InputAdornment } from "@mui/material";
+import { IoSearch } from "react-icons/io5";
 
 export function SearchBar () {
     const [searchText, setSearchText] = useState("");
@@ -19,18 +20,27 @@ export function SearchBar () {
     return (
         <>
             <div className="search">
-                {/* <TextField
+                <TextField
+                    className="search-bar"
                     id="outlined-basic"
                     variant="outlined"
-                    fullWidth
-                    label="Search"
-                /> */}
-                <form onSubmit={handleSubmit}>
-                    <input className="search" 
+                    value={searchText}
                     onChange={handleSearch}
-                     />
-
-                </form>
+                    sx={{
+                        "& .MuiOutlinedInput-root": {
+                        borderRadius: 30,
+                        },
+                    }}
+                    slotProps={{
+                        input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <IoSearch />
+                            </InputAdornment>
+                        ),
+                        },
+                    }}
+                />
             </div>
         </>   
     )
