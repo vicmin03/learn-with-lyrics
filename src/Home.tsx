@@ -33,7 +33,7 @@ function Home() {
 
   return (
     <>
-      <Navbar />
+      
       <SearchBar searchText={searchText} handleSearch={handleSearch}/>
       <section id="center">
         <div className="songs-list">

@@ -13,10 +13,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Routes */}
+      <Navbar />
+      {/* Routes 
+        / = home page
+        /songs/:id = individual song lyrics page
+        /invalid = redirects to 404 not found page
+      */}
       <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/songs/:songid" element={<SongPage />}/>
+          <Route path="/songs/:songid" element={<SongPage />}/>     
+          
           <Route path="*" element={<NotFound />} />
       </Routes>
 
