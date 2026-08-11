@@ -9,10 +9,37 @@ function formatName(name: string): string {
     return name.split(' ').join('%20');
 }
 
+// define an interface for representing a timed lyric in a song
 interface LyricsDict {
     timestamp: string,
     lyric: string
 }
+
+// convert timestamp string to milliseconds
+function timestampToMs(timestamp: string): number {
+    const [minutes, seconds] = timestamp.split(':');
+    const [wholeSeconds, milliseconds] = seconds.split('.');
+
+    return (
+        Number(minutes) * 60_000 +
+        Number(wholeSeconds) * 1_000 +
+        Number(milliseconds) * 10
+    );
+}
+
+// split line into timestamp and lyrics dictionary
+function splitLine(line: string): LyricsDict {
+    let firstSpace = line.indexOf(" ")
+    let [timestamp, lyric] = [line.slice(0, firstSpace), line.slice(firstSpace+1)]
+    return {"timestamp": timestamp, "lyric": lyric};
+}
+
+// split lyrics into lines 
+function splitLyrics(lyrics: string): LyricsDict[] {
+    let lines = lyrics.split('\n');
+    return lines.map(splitLine);   
+}
+
 
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
@@ -23,18 +50,6 @@ export default function SongPage() {
 
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
-
-    // split line into timestamp and lyrics dictionary
-    function splitLine(line: string): LyricsDict {
-        let [timestamp, lyric] = line.split(" ");
-        return {"timestamp": timestamp, "lyric": lyric};
-    }
-
-    // split lyrics into lines 
-    function splitLyrics(lyrics: string): LyricsDict[] {
-        let lines = lyrics.split('\n');
-        return lines.map(splitLine);   
-    }
 
     useEffect(() => {
         if (!song_info) {
@@ -59,7 +74,6 @@ export default function SongPage() {
 
                 const json = await response.json();
                 const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
-                console.log(lyrics)
                 if (!isCancelled) {
                     setSongLyrics(lyrics);
                 }
@@ -105,8 +119,8 @@ export default function SongPage() {
                 <p>{errorMessage}</p>
             ) : (
                 <>
-                    {lyric_lines.map((line, index) => (
-                        <p key={index}>{line.lyric}</p>
+                    {lyric_lines.map((line) => (
+                        <p className="song-lyrics" key={line.timestamp}>{line.lyric}</p>
                     ))
                     } 
                 </>
