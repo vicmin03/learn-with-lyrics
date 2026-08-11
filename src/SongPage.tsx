@@ -1,58 +1,90 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import song_list from './song_list.json'
+import song_list from './song_list.json';
 
-const API_URL = "https://wilooper-lyrica.hf.space/lyrics/"
+const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
-// https://wilooper-lyrica.hf.space/lyrics/?artist=Crowd%20Lu&song=%E5%A4%AA%E9%99%BD%E8%88%87%E5%9C%B0%E7%90%83&timestamps=true
-
-// function to add %20 in between spaces in song title/artist name for API calls to correct path
+// Add %20 between spaces in song title/artist for API calls.
 function formatName(name: string) {
-    return name.split(' ').join('%20')
+    return name.split(' ').join('%20');
 }
 
-
 export default function SongPage() {
-    const { song_id } = useParams<{song_id: string}>();
+    const { song_id } = useParams<{ song_id: string }>();
 
-    const [songLyrics, setSongLyrics] = useState("");
+    const [songLyrics, setSongLyrics] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    let song_info = song_list.find((song) => song.id.toString() == song_id)
-    
+    const song_info = song_list.find((song) => song.id.toString() === song_id);
+
     useEffect(() => {
-        if (!song_info) return;
+        if (!song_info) {
+            setIsLoading(false);
+            setErrorMessage('Song not found.');
+            return;
+        }
 
-        const fetchLyrics = async() => {
+        let isCancelled = false;
+
+        const fetchLyrics = async () => {
+            setIsLoading(true);
+            setErrorMessage(null);
+
             try {
-                console.log(`${API_URL}?artist=${formatName(song_info.artist)}&song=${formatName(song_info.title)}`);
                 const url = `${API_URL}?artist=${formatName(song_info.artist)}&song=${formatName(song_info.title)}`;
                 const response = await fetch(url);
 
-                if (!response.ok){
-                     throw new Error(`HTTP error: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
                 }
-                
+
                 const json = await response.json();
-                
-                setSongLyrics(json.data.lyrics);
-                console.log("API RESPONSE:", json.data.lyrics)
-                
-                
+                const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
+
+                if (!isCancelled) {
+                    setSongLyrics(lyrics);
+                }
             } catch (error) {
-                console.error("Failed to fetch lyrics", error)
+                console.error('Failed to fetch lyrics', error);
+
+                if (!isCancelled) {
+                    setErrorMessage('Unable to load lyrics right now.');
+                    setSongLyrics('');
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoading(false);
+                }
             }
         };
+
         fetchLyrics();
-    }, [])
+
+        // defines the cleanup function to be run on unmounting/rerendering based on dependencies changing
+        // isCancelled flag ensures that outdated results of a fetch aren't displayed if component/song changes
+        return () => {
+            isCancelled = true;
+        };
+    }, [song_id, song_info?.artist, song_info?.title]);
+
+    if (!song_info) {
+        return <p>Song not found.</p>;
+    }
 
     return (
         <>
-            <h1> {song_info && song_info.title} </h1>
-            {song_info && song_info.eng_title && <h1>({song_info.eng_title})</h1>}
-            <h4> {song_info && song_info.artist} </h4>
-            <p> Lyrics go here for song {song_id}</p>
-            <p>{songLyrics}</p>
-            
-        </>     
-    )
+            <h1>{song_info.title}</h1>
+            {song_info.eng_title && <h1>({song_info.eng_title})</h1>}
+            <h4>{song_info.artist}</h4>
+
+            {isLoading ? (
+                <p>Loading lyrics...</p>
+            ) : errorMessage ? (
+                <p>{errorMessage}</p>
+            ) : (
+                <p>{songLyrics}</p>
+            )}
+        </>
+    );
 }
