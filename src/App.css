@@ -162,3 +162,22 @@
   margin: 2rem 3rem;
   text-align: left;
 }
+
+.song-page-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.song-page-title {
+  margin: 2rem 0rem 2rem 3rem;
+  text-align: left;
+  font-size: 40px;
+}
+
+.song-page-artist {
+  text-align: right;
+  font-size: 20px;
+  margin: 2rem;
+  color: rgb(116, 116, 116);
+}

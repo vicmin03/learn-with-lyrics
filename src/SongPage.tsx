@@ -109,9 +109,13 @@ export default function SongPage() {
 
     return (
         <>
-            <h1>{song_info.title}</h1>
-            {song_info.eng_title && <h1>({song_info.eng_title})</h1>}
-            <h4>{song_info.artist}</h4>
+            <div className="song-page-header">
+                <h1 className="song-page-title">{song_info.title}</h1>
+                {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
+                <h4 className="song-page-artist">{song_info.artist}</h4>
+            </div>
+            
+
 
             {isLoading ? (
                 <p>Loading lyrics...</p>
