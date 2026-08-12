@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import App from '../App';
 
 describe('App', () => {
@@ -8,5 +8,11 @@ describe('App', () => {
 
         const navbar = screen.getByRole('navigation');
         expect(navbar).toBeInTheDocument();
+    })
+
+    test('display app title', () => {
+        render(<App />);
+
+        const title = screen.getByText('Learn With Lyrics');
     })
 });

@@ -18,7 +18,9 @@ export function Navbar() {
             <div className="language-select">
                 <FormControl variant="standard">
                     <Select className="select"
-                        id="demo-simple-select"
+                        id="language-select"
+                        aria-label="language select"
+                        label="Language"
                         value={language}            
                         displayEmpty
                         disableUnderline
