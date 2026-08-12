@@ -12,7 +12,7 @@ export function Navbar() {
     }
 
     return (
-        <div className="navbar">
+        <nav className="navbar" aria-label="navigation">
             <h1 className="logo">Learn With Lyrics</h1>
             
             <div className="language-select">
@@ -43,6 +43,6 @@ export function Navbar() {
                 <IoArrowForward className="large-icons" />
                 <img className="flag" src="/flags/uk_flag.png"></img>
             </div>
-        </div>
+        </nav>
     )
 }
