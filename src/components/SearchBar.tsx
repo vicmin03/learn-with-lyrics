@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
 import { TextField, InputAdornment } from "@mui/material";
 import { IoSearch } from "react-icons/io5";
 
 interface SearchProps {
     searchText: string,
-    handleSearch: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement, Element>
+    handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function SearchBar (props: SearchProps) {
+export default function SearchBar (props: SearchProps) {
 
     return (
         <>
@@ -18,18 +17,23 @@ export function SearchBar (props: SearchProps) {
                     variant="outlined"
                     value={props.searchText}
                     onChange={props.handleSearch}
+                    placeholder="Search for a song..."
                     sx={{
                         "& .MuiOutlinedInput-root": {
                         borderRadius: 30,
                         },
                     }}
                     slotProps={{
+                        htmlInput: {
+                            "aria-label": "search-bar"
+                        },
                         input: {
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <IoSearch />
-                            </InputAdornment>
-                        ),
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <IoSearch 
+                                        aria-label="search-icon"/>
+                                </InputAdornment>
+                            ),
                         },
                     }}
                 />
