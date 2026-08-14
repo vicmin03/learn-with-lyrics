@@ -6,11 +6,11 @@ interface CardProps {
     language: string
 }
 
-export function SongCard (props: CardProps) {
+export default function SongCard (props: CardProps) {
     return (
         <div className="song-card">
             <div className="song-cover">
-                <img src={props.img}></img>
+                <img src={props.img} alt={props.title} />
             </div>
             <div className='song-info'>
                 <p className="song-title">{props.title}</p>

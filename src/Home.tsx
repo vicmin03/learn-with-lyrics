@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { Navbar } from './components/Navbar'
-import { SongCard } from './components/SongCard'
-import { SearchBar } from './components/SearchBar'
+import SongCard from './components/SongCard'
+import SearchBar from './components/SearchBar'
 import song_list from './song_list.json'
 import { Link } from 'react-router-dom'
 
 function Home() {
-  const [count, setCount] = useState(0)
-
   // control state of search bar and debouncing text
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("")
@@ -51,13 +49,6 @@ function Home() {
           ))}
         </div>
 
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
       </section>
 
     </>
