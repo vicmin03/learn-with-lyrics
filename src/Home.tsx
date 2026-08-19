@@ -8,8 +8,8 @@ import { Link } from 'react-router-dom';
 
 function Home() {
   // control state of search bar and debouncing text
-  const [searchText, setSearchText] = useState("");
-  const [debouncedSearchText, setDebouncedSearchText] = useState("")
+  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("")
 
   // add debounce of 5ms so only filters song after user stops typing 
   useEffect(() => {
