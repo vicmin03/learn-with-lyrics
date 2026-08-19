@@ -1,12 +1,22 @@
+import { LyricsDict } from '../../types/lyrics';
+
 export const mockedLyricsResponse = {
   data: {
-    lyrics:
-      '00:12.34 Hello first line\n00:15.67 Second line here\n00:20.00 Final line',
+    hasTimestamps: true,
+    // API returns an array of timed_lyrics matching LyricsDict
+    timed_lyrics: [
+      { id: 'lrc_0', start_time: 12340, text: 'Hello first line' } as LyricsDict,
+      { id: 'lrc_1', start_time: 15670, text: 'Second line here' } as LyricsDict,
+      { id: 'lrc_2', start_time: 20000, text: 'Final line' } as LyricsDict,
+    ],
   },
 };
 
 export const mockedNoLyricsResponse = {
-  data: {},
+  data: {
+    hasTimestamps: false,
+    lyrics: '',
+  },
 };
 
 export const mockedBadResponse = {

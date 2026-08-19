@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { Navbar } from './components/navbar';
+import { Navbar } from './components/NavBar';
 import Home from './Home';
 import NotFound from './NotFound';
 import SongPage from './SongPage';

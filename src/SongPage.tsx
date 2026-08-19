@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import song_list from './song_list.json';
+import { Lyrics } from './components/Lyrics';
+import { LyricsDict } from './types/lyrics';
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -8,15 +10,6 @@ const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 function formatName(name: string): string {
     return name.split(' ').join('%20');
 }
-
-// define an interface for representing a timed lyric in a song
-interface LyricsDict {
-    id: string,
-    start_time: number,
-    end_time?: number,
-    text: string
-}
-
 // convert timestamp string to milliseconds
 function timestampToMs(timestamp: string): number {
     const [minutes, seconds] = timestamp.split(':');
@@ -61,7 +54,6 @@ function splitLyrics(lyrics: string, hasTimestamps: boolean): LyricsDict[] {
     }));
 }
 
-
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
 
@@ -73,6 +65,7 @@ export default function SongPage() {
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
 
+    // fetch lyrics from API on initial render
     useEffect(() => {
         if (!song_info) {
             setIsLoading(false);
@@ -149,8 +142,6 @@ export default function SongPage() {
                 {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
                 <h4 className="song-page-artist">{song_info.artist}</h4>
             </div>
-            
-
 
             {isLoading ? (
                 <p>Loading lyrics...</p>
@@ -158,10 +149,7 @@ export default function SongPage() {
                 <p>{errorMessage}</p>
             ) : (
                 <>
-                    {songLyrics.map((line, index) => (
-                        <p className="song-lyrics" key={`${line.start_time}-${index}`}>{line.text}</p>
-                    ))
-                    } 
+                    <Lyrics lyrics={songLyrics} />
                 </>
             )}
 
