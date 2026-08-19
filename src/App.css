@@ -44,6 +44,12 @@
   flex: 2;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  margin-right: 2rem;
+}
+
 .language-select {
   flex: 0 1 auto;
 }
@@ -173,7 +179,7 @@
   padding: 1rem 3rem;
 }
 
-.song-info {
+.song-page-info {
   flex: 1 1 500px;
   flex-direction: row;
   min-width: 0;

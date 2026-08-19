@@ -153,7 +153,7 @@ export default function SongPage() {
     return (
         <>
             <div className="song-page-header">
-                <div className="song-info">
+                <div className="song-page-info">
                     <h1 className="song-page-title">{song_info.title}</h1>
                     {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
                     <h4 className="song-page-artist">{song_info.artist}</h4>

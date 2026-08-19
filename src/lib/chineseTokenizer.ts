@@ -1,4 +1,5 @@
 import init, { tokenize } from "jieba-wasm";
+import { addCustomPinyin } from "./customPinyin";
 
 let initialized = false;
 let initializationPromise: Promise<void> | null = null;
@@ -13,6 +14,8 @@ async function ensureInitialized() {
         initializationPromise = init().then(() => {
             initialized = true;
         });
+
+        addCustomPinyin();
     }
 
     await initializationPromise;
