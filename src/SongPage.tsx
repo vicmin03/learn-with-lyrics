@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import Switch from '@mui/material/Switch';
 import song_list from './song_list.json';
 import { Lyrics } from './components/Lyrics';
 import { LyricsDict } from './types/lyrics';
+import { useSettings } from './Context';
+
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -64,6 +67,18 @@ export default function SongPage() {
 
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
+
+    // import settings for toggling pinyin and simplified/traditional character
+    const {
+        showPronunciation,
+        setShowPronunciation,
+        simplifiedCharacters,
+        setSimplifiedCharacters,
+    } = useSettings();
+
+    const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setShowPronunciation(!showPronunciation);
+    }
 
     // fetch lyrics from API on initial render
     useEffect(() => {
@@ -138,10 +153,24 @@ export default function SongPage() {
     return (
         <>
             <div className="song-page-header">
-                <h1 className="song-page-title">{song_info.title}</h1>
-                {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
-                <h4 className="song-page-artist">{song_info.artist}</h4>
+                <div className="song-page-info">
+                    <h1 className="song-page-title">{song_info.title}</h1>
+                    {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
+                    <h4 className="song-page-artist">{song_info.artist}</h4>
+                </div>
+
+                <div className="settings-bar">
+                    <span>Pinyin: Off</span>
+                    <Switch 
+                        aria-label="Toggle displaying pronunciation"
+                        checked = {showPronunciation} 
+                        onChange = {togglePronunciation} 
+                    />
+                    <span>On</span>
+                </div>
             </div>
+
+
 
             {isLoading ? (
                 <p>Loading lyrics...</p>
@@ -149,7 +178,7 @@ export default function SongPage() {
                 <p>{errorMessage}</p>
             ) : (
                 <>
-                    <Lyrics lyrics={songLyrics} />
+                    <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} />
                 </>
             )}
 

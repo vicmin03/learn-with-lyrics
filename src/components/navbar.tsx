@@ -3,6 +3,7 @@ import { IoSearch, IoArrowForward} from "react-icons/io5";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { FormControl } from "@mui/material";
+import { Link } from 'react-router-dom';
 
 export function Navbar() {
     const [language, setLanguage] = useState("Chinese")
@@ -13,7 +14,10 @@ export function Navbar() {
 
     return (
         <nav className="navbar" aria-label="navigation">
-            <h1 className="logo">Learn With Lyrics</h1>
+            <Link to={'/'} className="logo-link">
+                <h1 className="logo">Learn With Lyrics</h1>
+            </Link>
+            
             
             <div className="language-select">
                 <FormControl variant="standard">

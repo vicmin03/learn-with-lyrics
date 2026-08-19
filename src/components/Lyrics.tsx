@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
+import { pinyin } from 'pinyin-pro';
 import { ChineseToken, tokenizeChinese } from "../lib/chineseTokenizer";
 import { LyricsDict } from "../types/lyrics";
 
@@ -10,7 +11,8 @@ export interface TokenizedLyric extends LyricsDict{
 }
 
 interface LyricsProps {
-    lyrics: LyricsDict[]
+    lyrics: LyricsDict[],
+    showPronunciation: boolean,
     onLookup?: (word: string) => void
 }
 
@@ -18,7 +20,7 @@ function isWhitespace(token: ChineseToken) {
     return /^\s+$/.test(token.word);
 }
 
-export function Lyrics({ lyrics, onLookup }: LyricsProps) {
+export function Lyrics({ lyrics, showPronunciation, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
 
     function handleLookup(word: string) {
@@ -58,11 +60,18 @@ export function Lyrics({ lyrics, onLookup }: LyricsProps) {
                         }
 
                         return (
-                            <span 
-                                key={`${line.id}-${token.start}`} 
-                                className="lyrics-token"
-                                onClick={() => handleLookup(token.word)}>
-                                {token.word}
+                            <span
+                                key={`${line.id}-${token.start}`}
+                                className="lyrics-token-container"
+                            >
+                                {showPronunciation && <span className="pronunciation-text">
+                                    {pinyin(token.word)}
+                                </span>}
+                                <span 
+                                    className="lyrics-token"
+                                    onClick={() => handleLookup(token.word)}>
+                                    {token.word}
+                                </span>
                             </span>
                             )   
                         }
