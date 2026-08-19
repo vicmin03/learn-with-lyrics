@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import { Navbar } from './components/Navbar'
-import SongCard from './components/SongCard'
-import SearchBar from './components/SearchBar'
-import song_list from './song_list.json'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react';
+import './App.css';
+import { Navbar } from './components/NavBar';
+import SongCard from './components/SongCard';
+import SearchBar from './components/SearchBar';
+import song_list from './song_list.json';
+import { Link } from 'react-router-dom';
 
 function Home() {
   // control state of search bar and debouncing text

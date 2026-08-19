@@ -1,11 +1,26 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import SongPage from '../SongPage';
 import {
     mockedLyricsResponse,
     mockedNoLyricsResponse,
 } from './fixtures/lyrics_fixtures';
+
+// mock tokenizer so tests are fast and deterministic
+vi.mock('../lib/chineseTokenizer', () => ({
+    tokenizeChinese: async (text: string) => {
+        const parts: { word: string; start: number; end: number }[] = [];
+        let pos = 0;
+        const words = text.split(/(\s+)/);
+        for (const w of words) {
+            parts.push({ word: w, start: pos, end: pos + w.length });
+            pos += w.length;
+        }
+        return parts as any;
+    },
+}));
+
+const { default: SongPage } = await import('../SongPage');
 
 describe('Song Page', () => {
     beforeEach(() => {
@@ -41,10 +56,12 @@ describe('Song Page', () => {
         // loading state is shown while fetch resolves
         expect(screen.getByText('Loading lyrics...')).toBeInTheDocument();
 
-        // after fetch resolves the lyrics lines should appear
-        expect(await screen.findByText('Hello first line')).toBeInTheDocument();
-        expect(screen.getByText('Second line here')).toBeInTheDocument();
-        expect(screen.getByText('Final line')).toBeInTheDocument();
+        // after fetch resolves the lyrics tokens should appear (tokenizer mocked)
+        expect(await screen.findByText('Hello')).toBeInTheDocument();
+        expect(screen.getByText('first')).toBeInTheDocument();
+        expect(screen.getByText('Second')).toBeInTheDocument();
+        expect(screen.getByText('here')).toBeInTheDocument();
+        expect(screen.getByText('Final')).toBeInTheDocument();
 
         // fetch should have been called once
         expect(fetchMock).toHaveBeenCalled();

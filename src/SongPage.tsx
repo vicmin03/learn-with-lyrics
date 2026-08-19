@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import song_list from './song_list.json';
+import { Lyrics } from './components/Lyrics';
+import { LyricsDict } from './types/lyrics';
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -8,13 +10,6 @@ const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 function formatName(name: string): string {
     return name.split(' ').join('%20');
 }
-
-// define an interface for representing a timed lyric in a song
-interface LyricsDict {
-    timestamp: string,
-    lyric: string
-}
-
 // convert timestamp string to milliseconds
 function timestampToMs(timestamp: string): number {
     const [minutes, seconds] = timestamp.split(':');
@@ -28,29 +23,49 @@ function timestampToMs(timestamp: string): number {
 }
 
 // split line into timestamp and lyrics dictionary
-function splitLine(line: string): LyricsDict {
-    let firstSpace = line.indexOf(" ")
-    let [timestamp, lyric] = [line.slice(0, firstSpace), line.slice(firstSpace+1)]
-    return {"timestamp": timestamp, "lyric": lyric};
+function splitLine(line: string, index: number): LyricsDict {
+    // check for timestamp at beginning of line
+    const match = line.match(/^\[(\d{2}:\d{2}\.\d{2})\]\s*(.*)$/);
+
+    if (!match) {
+        return {
+            id: `lrc_${index}`,
+            start_time: 0,
+            text: line
+        };
+    }
+
+    const [, timestamp, lyric] = match;
+    return {"id":`lrc_${index}`, 
+            "start_time": timestampToMs(timestamp), 
+            "text": lyric};
 }
 
 // split lyrics into lines 
-function splitLyrics(lyrics: string): LyricsDict[] {
+function splitLyrics(lyrics: string, hasTimestamps: boolean): LyricsDict[] {
     let lines = lyrics.split('\n');
-    return lines.map(splitLine);   
+    if (hasTimestamps) {
+        return lines.map(splitLine);   
+    }
+    return lines.map((lyric, index) => ({
+        id: `lrc_${index}`,
+        start_time: 0,
+        text: lyric
+    }));
 }
-
 
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
 
-    const [songLyrics, setSongLyrics] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [songLyrics, setSongLyrics] = useState<LyricsDict[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [hasTimestamps, setHasTimestamps] = useState<boolean>(false);
 
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
 
+    // fetch lyrics from API on initial render
     useEffect(() => {
         if (!song_info) {
             setIsLoading(false);
@@ -73,16 +88,32 @@ export default function SongPage() {
                 }
 
                 const json = await response.json();
-                const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
+                console.log(json.data);
+                const hasTimestamps = Boolean(json.data.hasTimestamps);
+
+                // store lyrics as array of lyrics dictionaries
+                let lyric_lines: LyricsDict[];
+
+                if (hasTimestamps && Array.isArray(json?.data?.timed_lyrics)) {
+                    lyric_lines = json.data.timed_lyrics;
+                }
+                else {
+                    const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
+                    // need to split lyric string into separate lines
+                    lyric_lines = splitLyrics(lyrics, hasTimestamps);
+
+                }
+                
                 if (!isCancelled) {
-                    setSongLyrics(lyrics);
+                    setSongLyrics(lyric_lines);
+                    setHasTimestamps(hasTimestamps);
                 }
             } catch (error) {
                 console.error('Failed to fetch lyrics', error);
 
                 if (!isCancelled) {
                     setErrorMessage('Unable to load lyrics right now.');
-                    setSongLyrics('');
+                    setSongLyrics([]);
                 }
             } finally {
                 if (!isCancelled) {
@@ -104,9 +135,6 @@ export default function SongPage() {
         return <p>Song not found.</p>;
     }
 
-    // split lyrics into separate lines
-    const lyric_lines = splitLyrics(songLyrics);
-
     return (
         <>
             <div className="song-page-header">
@@ -114,8 +142,6 @@ export default function SongPage() {
                 {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
                 <h4 className="song-page-artist">{song_info.artist}</h4>
             </div>
-            
-
 
             {isLoading ? (
                 <p>Loading lyrics...</p>
@@ -123,10 +149,7 @@ export default function SongPage() {
                 <p>{errorMessage}</p>
             ) : (
                 <>
-                    {lyric_lines.map((line) => (
-                        <p className="song-lyrics" key={line.timestamp}>{line.lyric}</p>
-                    ))
-                    } 
+                    <Lyrics lyrics={songLyrics} />
                 </>
             )}
 
