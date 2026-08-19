@@ -1,10 +1,17 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
     mockedLyricsResponse,
     mockedNoLyricsResponse,
 } from './fixtures/lyrics_fixtures';
+import { SettingsProvider } from '../Context';
+
+// mock pinyin-pro for deterministic pronunciation output
+vi.mock('pinyin-pro', () => ({
+    pinyin: (s: string) => `py(${s})`,
+}));
 
 // mock tokenizer so tests are fast and deterministic
 vi.mock('../lib/chineseTokenizer', () => ({
@@ -43,9 +50,11 @@ describe('Song Page', () => {
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
-                <Routes>
-                    <Route path="/song/:song_id" element={<SongPage />} />
-                </Routes>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/song/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
             </MemoryRouter>
         );
 
@@ -74,9 +83,11 @@ describe('Song Page', () => {
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
-                <Routes>
-                    <Route path="/song/:song_id" element={<SongPage />} />
-                </Routes>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/song/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
             </MemoryRouter>
         );
 
@@ -87,9 +98,11 @@ describe('Song Page', () => {
     test('renders Song not found for invalid id', () => {
         render(
             <MemoryRouter initialEntries={["/song/999"]}>
-                <Routes>
-                    <Route path="/song/:song_id" element={<SongPage />} />
-                </Routes>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/song/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
             </MemoryRouter>
         );
 
@@ -106,9 +119,11 @@ describe('Song Page', () => {
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
-                <Routes>
-                    <Route path="/song/:song_id" element={<SongPage />} />
-                </Routes>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/song/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
             </MemoryRouter>
         );
 
@@ -120,5 +135,37 @@ describe('Song Page', () => {
         // use a small loop via findByText with not present by querying
         await new Promise((res) => setTimeout(res, 0));
         expect(fetchMock).toHaveBeenCalled();
+    });
+
+    test('toggles pronunciation switch and shows pronunciation text', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => mockedLyricsResponse,
+        });
+        // @ts-ignore
+        global.fetch = fetchMock;
+
+        render(
+            <MemoryRouter initialEntries={["/song/1"]}>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/song/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
+            </MemoryRouter>
+        );
+
+        // wait for tokens to appear
+        expect(await screen.findByText('Hello')).toBeInTheDocument();
+
+        // find the switch and toggle it (MUI renders a switch role)
+        const toggle = screen.getByRole('switch');
+
+        expect(toggle).not.toBeChecked();
+        await userEvent.click(toggle);
+        expect(toggle).toBeChecked();
+
+        // pronunciation text should appear (from mocked pinyin-pro)
+        expect(await screen.findByText('py(Hello)')).toBeInTheDocument();
     });
 });

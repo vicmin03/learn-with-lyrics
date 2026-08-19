@@ -17,6 +17,11 @@ vi.mock('../lib/chineseTokenizer', () => ({
     },
 }));
 
+// Mock pinyin-pro so pronunciation output is deterministic
+vi.mock('pinyin-pro', () => ({
+    pinyin: (s: string) => `py(${s})`,
+}));
+
 const { Lyrics } = await import('../components/Lyrics');
 
 describe('Lyrics', () => {
@@ -35,7 +40,7 @@ describe('Lyrics', () => {
             { id: 'lrc_1', start_time: 1000, text: 'Second line' },
         ];
 
-        render(<Lyrics lyrics={lyrics} />);
+        render(<Lyrics lyrics={lyrics} showPronunciation={false} />);
 
         // tokens should appear as separate text/spans
         expect(await screen.findByText('Hello')).toBeInTheDocument();
@@ -49,7 +54,7 @@ describe('Lyrics', () => {
 
         const lyrics = [{ id: 'lrc_0', start_time: 0, text: 'Click me' }];
 
-        render(<Lyrics lyrics={lyrics} onLookup={mockLookup} />);
+        render(<Lyrics lyrics={lyrics} showPronunciation={false} onLookup={mockLookup} />);
 
         const token = await screen.findByText('Click');
         await userEvent.click(token);
@@ -58,9 +63,20 @@ describe('Lyrics', () => {
     });
 
     test('renders nothing when no lyrics provided', () => {
-        render(<Lyrics lyrics={[]} />);
+        render(<Lyrics lyrics={[]} showPronunciation={false} />);
         // no paragraphs should be present
         const paragraphs = document.querySelectorAll('p.song-lyrics');
         expect(paragraphs.length).toBe(0);
+    });
+
+    test('shows pronunciation when enabled', async () => {
+        const lyrics = [{ id: 'lrc_0', start_time: 0, text: '你好 world' }];
+
+        render(<Lyrics lyrics={lyrics} showPronunciation={true} />);
+
+        // tokenization is mocked; wait for tokens and pronunciation spans
+        expect(await screen.findByText('你好')).toBeInTheDocument();
+        // pronunciation text should be present (from mocked pinyin-pro)
+        expect(screen.getAllByText(/py\(/).length).toBeGreaterThan(0);
     });
 });

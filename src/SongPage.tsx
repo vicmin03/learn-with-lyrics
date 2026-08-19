@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Switch } from '@mui/material';
+import Switch from '@mui/material/Switch';
 import song_list from './song_list.json';
 import { Lyrics } from './components/Lyrics';
 import { LyricsDict } from './types/lyrics';
@@ -162,6 +162,7 @@ export default function SongPage() {
                 <div className="settings-bar">
                     <span>Pinyin: Off</span>
                     <Switch 
+                        aria-label="Toggle displaying pronunciation"
                         checked = {showPronunciation} 
                         onChange = {togglePronunciation} 
                     />
