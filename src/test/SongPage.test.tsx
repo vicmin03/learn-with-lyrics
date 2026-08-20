@@ -6,7 +6,7 @@ import {
     mockedLyricsResponse,
     mockedNoLyricsResponse,
 } from './fixtures/lyrics_fixtures';
-import { SettingsProvider } from '../Context';
+import { SettingsProvider } from '../contexts/SettingsProvider';
 
 // mock pinyin-pro for deterministic pronunciation output
 vi.mock('pinyin-pro', () => ({

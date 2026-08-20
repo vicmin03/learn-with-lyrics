@@ -4,7 +4,7 @@ import Switch from '@mui/material/Switch';
 import song_list from './song_list.json';
 import { Lyrics } from './components/Lyrics';
 import { LyricsDict } from './types/lyrics';
-import { useSettings } from './Context';
+import { useSettings } from './contexts/useSettings';
 
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
@@ -77,7 +77,7 @@ export default function SongPage() {
     } = useSettings();
 
     const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setShowPronunciation(!showPronunciation);
+        setShowPronunciation(event.target.checked);
     }
 
     // fetch lyrics from API on initial render
