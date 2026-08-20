@@ -1,13 +1,5 @@
-import { useState, createContext, useContext, type ReactNode } from 'react';
-
-interface SettingsContextType {
-  showPronunciation: boolean;
-  setShowPronunciation: React.Dispatch<React.SetStateAction<boolean>>;
-  simplifiedCharacters: boolean;
-  setSimplifiedCharacters: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+import { useState, type ReactNode } from 'react';
+import { SettingsContext } from './SettingsContext';
 
 interface SettingsProviderProps {
   children: ReactNode;
@@ -30,12 +22,3 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     )
 }
 
-export const useSettings = () => {
-    const context = useContext(SettingsContext);
-
-    if (context === undefined) {
-        throw new Error("useSettings must be used within a SettingsProvider");
-    }
-
-    return context;
-};

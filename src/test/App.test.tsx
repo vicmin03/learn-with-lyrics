@@ -14,5 +14,6 @@ describe('App', () => {
         render(<App />);
 
         const title = screen.getByText('Learn With Lyrics');
+        expect(title).toBeInTheDocument();
     })
 });

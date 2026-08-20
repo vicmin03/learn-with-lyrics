@@ -6,7 +6,7 @@ import {
     mockedLyricsResponse,
     mockedNoLyricsResponse,
 } from './fixtures/lyrics_fixtures';
-import { SettingsProvider } from '../Context';
+import { SettingsProvider } from '../contexts/SettingsProvider';
 
 // mock pinyin-pro for deterministic pronunciation output
 vi.mock('pinyin-pro', () => ({
@@ -23,7 +23,7 @@ vi.mock('../lib/chineseTokenizer', () => ({
             parts.push({ word: w, start: pos, end: pos + w.length });
             pos += w.length;
         }
-        return parts as any;
+        return parts;
     },
 }));
 
@@ -35,9 +35,7 @@ describe('Song Page', () => {
     });
 
     afterEach(() => {
-        // ensure fetch mock is cleaned up
-        // @ts-ignore global fetch used in tests
-        if ((global as any).fetch && (global as any).fetch.mockRestore) (global as any).fetch.mockRestore();
+        vi.unstubAllGlobals();
     });
 
     test('displays title, artist and shows loading then lyrics when fetch succeeds', async () => {
@@ -45,8 +43,7 @@ describe('Song Page', () => {
             ok: true,
             json: async () => mockedLyricsResponse,
         });
-        // @ts-ignore
-        global.fetch = fetchMock;
+        vi.stubGlobal('fetch', fetchMock);
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
@@ -78,8 +75,7 @@ describe('Song Page', () => {
 
     test('shows error message when fetch fails', async () => {
         const fetchMock = vi.fn().mockRejectedValue(new Error('network error'));
-        // @ts-ignore
-        global.fetch = fetchMock;
+        vi.stubGlobal('fetch', fetchMock);
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
@@ -114,8 +110,7 @@ describe('Song Page', () => {
             ok: true,
             json: async () => mockedNoLyricsResponse,
         });
-        // @ts-ignore
-        global.fetch = fetchMock;
+        vi.stubGlobal('fetch', fetchMock);
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>
@@ -142,8 +137,7 @@ describe('Song Page', () => {
             ok: true,
             json: async () => mockedLyricsResponse,
         });
-        // @ts-ignore
-        global.fetch = fetchMock;
+        vi.stubGlobal('fetch', fetchMock);
 
         render(
             <MemoryRouter initialEntries={["/song/1"]}>

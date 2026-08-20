@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import SongCard from '../components/SongCard';
 
 // helper function to create SongCard component with props for testing

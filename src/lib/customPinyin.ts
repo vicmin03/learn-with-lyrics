@@ -4,6 +4,7 @@ export const addCustomPinyin = () => {
     customPinyin({
         愛著: 'ài zhe',
         怎麼: 'zěn me',
-        什麼: 'shén me'
+        什麼: 'shén me',
+        繞著: 'rào zhe'
     })
 }

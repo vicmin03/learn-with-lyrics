@@ -1,10 +1,10 @@
 import './App.css';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/NavBar';
 import Home from './Home';
 import NotFound from './NotFound';
 import SongPage from './SongPage';
-import { SettingsProvider } from './Context';
+import { SettingsProvider } from './contexts/SettingsProvider';
 
 function App() {
 

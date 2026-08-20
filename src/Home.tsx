@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { Navbar } from './components/NavBar';
 import SongCard from './components/SongCard';
 import SearchBar from './components/SearchBar';
 import song_list from './song_list.json';
