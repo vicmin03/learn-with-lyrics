@@ -46,7 +46,7 @@ function splitLine(line: string, index: number): LyricsDict {
 
 // split lyrics into lines 
 function splitLyrics(lyrics: string, hasTimestamps: boolean): LyricsDict[] {
-    let lines = lyrics.split('\n');
+    const lines = lyrics.split('\n');
     if (hasTimestamps) {
         return lines.map(splitLine);   
     }
@@ -72,8 +72,8 @@ export default function SongPage() {
     const {
         showPronunciation,
         setShowPronunciation,
-        simplifiedCharacters,
-        setSimplifiedCharacters,
+        // simplifiedCharacters,
+        // setSimplifiedCharacters,
     } = useSettings();
 
     const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,12 +104,12 @@ export default function SongPage() {
 
                 const json = await response.json();
                 console.log(json.data);
-                const hasTimestamps = Boolean(json.data.hasTimestamps);
+                const hasTimestamp = Boolean(json.data.hasTimestamps);
 
                 // store lyrics as array of lyrics dictionaries
                 let lyric_lines: LyricsDict[];
 
-                if (hasTimestamps && Array.isArray(json?.data?.timed_lyrics)) {
+                if (hasTimestamp && Array.isArray(json?.data?.timed_lyrics)) {
                     lyric_lines = json.data.timed_lyrics;
                 }
                 else {
@@ -121,7 +121,7 @@ export default function SongPage() {
                 
                 if (!isCancelled) {
                     setSongLyrics(lyric_lines);
-                    setHasTimestamps(hasTimestamps);
+                    setHasTimestamps(hasTimestamp);
                 }
             } catch (error) {
                 console.error('Failed to fetch lyrics', error);
@@ -144,7 +144,7 @@ export default function SongPage() {
         return () => {
             isCancelled = true;
         };
-    }, [song_id, song_info?.artist, song_info?.title]);
+    }, [song_id, song_info, song_info?.artist, song_info?.title]);
 
     if (!song_info) {
         return <p>Song not found.</p>;

@@ -1,19 +1,20 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ChineseToken } from '../lib/chineseTokenizer';
 
 // Mock the tokenizer so tests run fast and deterministically
 vi.mock('../lib/chineseTokenizer', () => ({
     tokenizeChinese: async (text: string) => {
         // simple tokenizer: split on spaces, keep whitespace tokens
-        const parts: { word: string; start: number; end: number }[] = [];
+        const parts: ChineseToken[] = [];
         let pos = 0;
         const words = text.split(/(\s+)/);
         for (const w of words) {
             parts.push({ word: w, start: pos, end: pos + w.length });
             pos += w.length;
         }
-        return parts as any;
+        return parts;
     },
 }));
 
