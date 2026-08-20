@@ -5,6 +5,7 @@ import song_list from './song_list.json';
 import { Lyrics } from './components/Lyrics';
 import { LyricsDict } from './types/lyrics';
 import { useSettings } from './contexts/useSettings';
+import { IoCheckmarkCircleOutline } from "react-icons/io5";
 
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
@@ -83,8 +84,6 @@ export default function SongPage() {
     // fetch lyrics from API on initial render
     useEffect(() => {
         if (!song_info) {
-            setIsLoading(false);
-            setErrorMessage('Song not found.');
             return;
         }
 
@@ -115,7 +114,7 @@ export default function SongPage() {
                 else {
                     const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
                     // need to split lyric string into separate lines
-                    lyric_lines = splitLyrics(lyrics, hasTimestamps);
+                    lyric_lines = splitLyrics(lyrics, hasTimestamp);
 
                 }
                 
@@ -144,7 +143,7 @@ export default function SongPage() {
         return () => {
             isCancelled = true;
         };
-    }, [song_id, song_info, song_info?.artist, song_info?.title]);
+    }, [song_info]);
 
     if (!song_info) {
         return <p>Song not found.</p>;
@@ -160,6 +159,10 @@ export default function SongPage() {
                 </div>
 
                 <div className="settings-bar">
+                    {hasTimestamps && <div className="icon-and-text">
+                            <IoCheckmarkCircleOutline className="small-icon"/>
+                            <p>Has timed lyrics</p>
+                        </div>}
                     <span>Pinyin: Off</span>
                     <Switch 
                         aria-label="Toggle displaying pronunciation"
@@ -169,6 +172,7 @@ export default function SongPage() {
                     <span>On</span>
                 </div>
             </div>
+
 
 
 

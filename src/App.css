@@ -74,6 +74,12 @@
   width: 50px;
 }
 
+.small-icon {
+  width: 15px;
+  height: 15px;
+  margin-right: 0.2rem;
+}
+
 .large-icons {
   width: 30px;
   height: 30px;
@@ -230,4 +236,10 @@
   width: 100%;
   text-align: center;
   align-content: stretch;
+}
+
+.icon-and-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
