@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
-import song_list from './song_list.json';
-import { Lyrics } from './components/Lyrics';
-import { LyricsDict } from './types/lyrics';
-import { useSettings } from './contexts/useSettings';
+import song_list from '../../song_list.json';
+import { Lyrics } from '../Lyrics';
+import { LyricsDict } from '../../types/lyrics';
+import VocabInfo from '../VocabInfo/VocabInfo';
+import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
+import './SongPage.css';
 
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
@@ -61,10 +63,14 @@ function splitLyrics(lyrics: string, hasTimestamps: boolean): LyricsDict[] {
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
 
+    // manage state for loading song lyrics
     const [songLyrics, setSongLyrics] = useState<LyricsDict[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [hasTimestamps, setHasTimestamps] = useState<boolean>(false);
+
+    // manages vocab word that user clicks
+    const [vocabWord, setVocabWord] = useState("");
 
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
@@ -77,9 +83,15 @@ export default function SongPage() {
         // setSimplifiedCharacters,
     } = useSettings();
 
+    // to toggle showing pronunciation above song lyrics
     const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
         setShowPronunciation(event.target.checked);
     }
+
+    // to handle displaying info about clicked vocabulary
+    // const lookupWord = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     setVocabWord()
+    // }
 
     // fetch lyrics from API on initial render
     useEffect(() => {
@@ -175,16 +187,24 @@ export default function SongPage() {
 
 
 
+            <div className="song-page-main">
+                {isLoading ? (
+                    <p>Loading lyrics...</p>
+                ) : errorMessage ? (
+                    <p>{errorMessage}</p>
+                ) : (
+                    <>
+                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} onLookup={setVocabWord} />
+                    </>
+                )}
 
-            {isLoading ? (
-                <p>Loading lyrics...</p>
-            ) : errorMessage ? (
-                <p>{errorMessage}</p>
-            ) : (
-                <>
-                    <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} />
-                </>
-            )}
+                {vocabWord && <VocabInfo vocab={vocabWord}/>}
+                <p>hELLOOO: {vocabWord}</p>
+
+
+            </div>
+
+
 
               
         </>

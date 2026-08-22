@@ -1,9 +1,9 @@
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Navbar } from './components/NavBar';
+import Navbar from './components/NavBar';
 import Home from './Home';
 import NotFound from './NotFound';
-import SongPage from './SongPage';
+import SongPage from './components/SongPage/SongPage';
 import { SettingsProvider } from './contexts/SettingsProvider';
 
 function App() {

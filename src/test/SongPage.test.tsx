@@ -27,7 +27,7 @@ vi.mock('../lib/chineseTokenizer', () => ({
     },
 }));
 
-const { default: SongPage } = await import('../SongPage');
+const { default: SongPage } = await import('../components/SongPage/SongPage');
 
 describe('Song Page', () => {
     beforeEach(() => {

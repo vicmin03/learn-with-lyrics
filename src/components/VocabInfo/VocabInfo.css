@@ -1,0 +1,11 @@
+.vocab-info-box {
+    background-color: var(--social-bg);
+    border: 3px solid black;
+    position: fixed;
+    right: 10%;
+    justify-content: start;
+    align-items: start;
+    padding: 1rem;
+    height: 200px;
+    width: 30%;
+}

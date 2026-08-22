@@ -147,7 +147,7 @@
 }
 
 .search {
-  margin: 1rem; 
+  margin: 2rem; 
 }
 
 .search-bar {
@@ -155,7 +155,6 @@
   height: 30px;
   border-radius: 20px;
   border: 1px solid red;
-
 }
 
 .card-link {
@@ -169,7 +168,7 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.song-lyrics {
+/* .song-lyrics {
   font-size: 2.5rem;
   margin: 1.5rem 3rem;
   text-align: left;
@@ -203,9 +202,9 @@
   text-align: right;
   font-size: 20px;
   align-self: center;
-  /* margin: 2rem; */
+  margin: 2rem;
   color: rgb(116, 116, 116);
-}
+} */
 
 .settings-bar {
   display: flex;
@@ -228,7 +227,7 @@
 }
 
 .lyrics-token:hover {
-  background-color: #f6baba;
+  background-color: var(--accent-bg);
 }
 
 .pronunciation-text {
