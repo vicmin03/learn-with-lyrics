@@ -30,6 +30,11 @@ export default function VocabInfo ({vocab}: VocabInfoProps) {
 
     }
 
+    // handles tokens that aren't dictionary words
+    function isDictionaryWord(word: string): boolean {
+        return lookup(word).length > 0;
+    }
+
 
     useEffect(() => {
         lookupWord(vocab);

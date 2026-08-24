@@ -19,6 +19,7 @@
     "ionicons": "^8.1.0",
     "jieba-wasm": "^2.4.0",
     "lodash": "^4.18.1",
+    "opencc-js": "^1.4.2",
     "pinyin-pro": "^3.29.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
