@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { pinyin } from 'pinyin-pro';
+import { pinyin } from "pinyin-pro";
 import { ChineseToken, tokenizeChinese } from "../lib/chineseTokenizer";
 import { LyricsDict } from "../types/lyrics";
 

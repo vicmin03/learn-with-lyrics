@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { FormControl } from "@mui/material";
 import { Link } from 'react-router-dom';
 
-export function Navbar() {
+export default function Navbar() {
     const [language, setLanguage] = useState("Chinese")
 
     const handleChange = (event: SelectChangeEvent) => {

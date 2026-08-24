@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
 import './App.css';
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import SongCard from './components/SongCard';
 import SearchBar from './components/SearchBar';
 import song_list from './song_list.json';
-import { Link } from 'react-router-dom';
+
 
 function Home() {
   // control state of search bar and debouncing text
@@ -24,8 +25,10 @@ function Home() {
   }
 
   // filter songs based on user input to search bar
-  const valid_songs = song_list.filter((song) => 
+  const valid_songs = useMemo(() => {
+    return song_list.filter((song) => 
     song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()))
+  }, [debouncedSearchText]);
 
 
   return (
