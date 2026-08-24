@@ -198,7 +198,12 @@ export default function SongPage() {
                     </>
                 )}
 
-                {vocabWord && <VocabInfo vocab={vocabWord}/>}
+                {vocabWord && (
+                    <VocabInfo
+                        vocab={vocabWord}
+                        onClose={() => setVocabWord("")}
+                    />
+                )}
 
             </div>
 

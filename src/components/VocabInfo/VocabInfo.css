@@ -33,3 +33,14 @@
     top: 1rem;
     z-index: 1;
 }
+
+.dict-link {
+    position: absolute;
+    right: 5rem;
+    top: 1.5rem;
+    margin: 1rem;
+}
+
+.add-to-deck-button {
+    width: 100%;
+}
