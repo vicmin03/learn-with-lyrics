@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { pinyin } from "pinyin-pro";
 import { ChineseToken, tokenizeChinese } from "../lib/chineseTokenizer";
-import cedict from "cc-cedict";
 import { LyricsDict } from "../types/lyrics";
 
 

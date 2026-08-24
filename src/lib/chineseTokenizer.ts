@@ -37,7 +37,7 @@ export type ChineseToken = {
 // }
 
 export async function tokenizeChinese(text: string): Promise<ChineseToken[]> {
-    let tokens = await initialiseTokens(text);
+    const tokens = await initialiseTokens(text);
     return refineTokens(tokens);
 }
 

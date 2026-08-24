@@ -1,6 +1,6 @@
 import './VocabInfo.css';
 import '../../App.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { IconButton, Button, Link } from '@mui/material';
 import { IoClose } from "react-icons/io5";
 import { IoIosLink } from "react-icons/io";
@@ -16,11 +16,9 @@ interface VocabInfoProps {
 }
 
 export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
-    const [definition, setDefinition] = useState<string[]>([])
+    const [addedVocab, setAddedVocab] = useState<string | null>(null);
 
-    const [addToDeckText, setAddToDeckText] = useState("Add To Deck");
-
-    function lookupWord(word: string) {
+    function lookupWord(word: string): string[] {
         // if returning null, might need to split further into individual charas
         // switch handling simplified/traditional to settings, so wouldnt need two lookup
         let info = cedict.getBySimplified(word, null, { asObject: false }) as DictionaryEntry[];
@@ -33,17 +31,14 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
             console.log(info);
 
             // Get the definitions from the first dictionary entry
-            setDefinition(info[0].english);
+            return info[0].english;
         } else {
-            setDefinition([]);
+            return [];
         }
 
     }
 
-    useEffect(() => {
-        lookupWord(vocab);
-        setAddToDeckText("Add To Deck");
-    }, [vocab])
+    const definition = lookupWord(vocab);
 
     // close the vocab info box
     const closeInfo = () => {
@@ -52,8 +47,10 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
 
     const addToDeck = () => {
         // should add vocab word to (a) flashcard deck
-        setAddToDeckText("Word added to deck")
+        setAddedVocab(vocab)
     }
+
+    const addToDeckText = addedVocab === vocab ? "Word added to deck" : "Add To Deck";
 
     return (
         <div className="vocab-info-box">
