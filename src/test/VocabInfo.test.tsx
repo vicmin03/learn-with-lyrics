@@ -16,6 +16,10 @@ describe('VocabInfo', () => {
         
     })
 
+    test('clicking on close button removes component', () => {
+        
+    })
+
     test('displays add to deck button', () => {
         // displays add to deck button
 

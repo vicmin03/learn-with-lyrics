@@ -1,11 +1,35 @@
 .vocab-info-box {
     background-color: var(--social-bg);
     border: 3px solid black;
-    position: fixed;
-    right: 10%;
+    position:sticky;
+    top: 25%;
+    right: 5%;
     justify-content: start;
     align-items: start;
     padding: 1rem;
-    height: 200px;
+    height:fit-content;
     width: 30%;
+}
+
+.vocab-pronunciation {
+    text-align: left;
+}
+
+.vocab-word {
+    font-weight: bold;
+    font-size: 2rem;
+    text-align: left;
+    margin-top: 5px;
+}
+
+.vocab-definition {
+    text-align: left;
+    list-style:decimal;
+}
+
+.vocab-info-box .close-button {
+    position: absolute;
+    right: 0.75rem;
+    top: 1rem;
+    z-index: 1;
 }

@@ -1,5 +1,8 @@
 import './VocabInfo.css';
+import '../../App.css';
 import { useState, useEffect } from 'react';
+import { IconButton } from '@mui/material';
+import { IoClose } from "react-icons/io5";
 import cedict, { DictionaryEntry } from 'cc-cedict';
 import { pinyin } from 'pinyin-pro';
 
@@ -30,24 +33,22 @@ export default function VocabInfo ({vocab}: VocabInfoProps) {
 
     }
 
-    // handles tokens that aren't dictionary words
-    function isDictionaryWord(word: string): boolean {
-        return lookup(word).length > 0;
-    }
-
-
     useEffect(() => {
         lookupWord(vocab);
     }, [vocab])
 
     return (
         <div className="vocab-info-box">
-            <p>{pinyin(vocab)}</p>
-            <h3>{vocab}</h3>
+            <IconButton aria-label="close" className="close-button">
+                <IoClose />
+            </IconButton>
+            <p className="vocab-pronunciation">{pinyin(vocab)}</p>
+            <h3 className="vocab-word">{vocab}</h3>
+
             {definition.length > 0 ? (
                 <ul>
                     {definition.map((def, index) => (
-                        <li key={index}>{def}</li>
+                        <li className="vocab-definition" key={index}>{def}</li>
                     ))}
                 </ul>
             ) : (

@@ -199,14 +199,9 @@ export default function SongPage() {
                 )}
 
                 {vocabWord && <VocabInfo vocab={vocabWord}/>}
-                <p>hELLOOO: {vocabWord}</p>
-
 
             </div>
 
-
-
-              
         </>
     );
 }
