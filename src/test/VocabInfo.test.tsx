@@ -53,16 +53,41 @@ describe('VocabInfo', () => {
     test('displays add to deck button', () => {
         render(<VocabInfo vocab={vocab} onClose={vi.fn()} />);
 
-        expect(screen.getByRole('button', { name: 'Add to Deck' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Add To Deck' })).toBeInTheDocument();
     })
 
     test('user can click and add card to deck, changing button text', async () => {
         const user = userEvent.setup();
         render(<VocabInfo vocab={vocab} onClose={vi.fn()} />);
 
-        const addToDeckButton = screen.getByRole('button', { name: 'Add to Deck' });
+        const addToDeckButton = screen.getByRole('button', { name: 'Add To Deck' });
         expect(addToDeckButton).toBeEnabled();
         await user.click(addToDeckButton);
-        expect(addToDeckButton).toHaveTextContent('Add to Deck');
+        expect(addToDeckButton).toHaveTextContent('Word added to deck');
+    })
+
+    test('resets the add button when the vocab changes', async () => {
+        const user = userEvent.setup();
+
+        function TestVocabInfo() {
+            const [selectedVocab, setSelectedVocab] = useState(vocab);
+
+            return (
+                <>
+                    <VocabInfo vocab={selectedVocab} onClose={vi.fn()} />
+                    <button onClick={() => setSelectedVocab('谢谢')}>select another word</button>
+                </>
+            );
+        }
+
+        render(<TestVocabInfo />);
+
+        await user.click(screen.getByRole('button', { name: 'Add To Deck' }));
+        expect(screen.getByRole('button', { name: 'Word added to deck' })).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'select another word' }));
+
+        expect(screen.getByRole('heading', { name: '谢谢' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Add To Deck' })).toBeInTheDocument();
     })
 })

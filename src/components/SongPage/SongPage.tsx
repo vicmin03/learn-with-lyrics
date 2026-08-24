@@ -200,6 +200,7 @@ export default function SongPage() {
 
                 {vocabWord && (
                     <VocabInfo
+                        key={vocabWord}
                         vocab={vocabWord}
                         onClose={() => setVocabWord("")}
                     />

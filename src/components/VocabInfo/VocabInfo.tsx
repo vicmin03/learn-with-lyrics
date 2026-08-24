@@ -18,6 +18,8 @@ interface VocabInfoProps {
 export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
     const [definition, setDefinition] = useState<string[]>([])
 
+    const [addToDeckText, setAddToDeckText] = useState("Add To Deck");
+
     function lookupWord(word: string) {
         // if returning null, might need to split further into individual charas
         // switch handling simplified/traditional to settings, so wouldnt need two lookup
@@ -40,10 +42,17 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
 
     useEffect(() => {
         lookupWord(vocab);
+        setAddToDeckText("Add To Deck");
     }, [vocab])
 
+    // close the vocab info box
     const closeInfo = () => {
         onClose();
+    }
+
+    const addToDeck = () => {
+        // should add vocab word to (a) flashcard deck
+        setAddToDeckText("Word added to deck")
     }
 
     return (
@@ -75,8 +84,9 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
                 <p>No definition found.</p>
             )}
 
-            <Button className="add-to-deck-button">
-                Add to Deck
+            <Button className="add-to-deck-button"
+                onClick={addToDeck}>
+                {addToDeckText}
             </Button>
 
         </div>
