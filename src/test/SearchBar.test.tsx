@@ -46,7 +46,7 @@ describe('SearchBar', () => {
     test('search bar displays search hint text', () => {
         render(<TestSearchBar />);
 
-        const searchBar = screen.getByPlaceholderText('Search for a song...')
+        const searchBar = screen.getByPlaceholderText('Search for a song or artist...')
         expect(searchBar).toBeInTheDocument();
         
     })

@@ -17,7 +17,7 @@ export default function SearchBar (props: SearchProps) {
                     variant="outlined"
                     value={props.searchText}
                     onChange={props.handleSearch}
-                    placeholder="Search for a song..."
+                    placeholder="Search for a song or artist..."
                     sx={{
                         "& .MuiOutlinedInput-root": {
                         borderRadius: 30,

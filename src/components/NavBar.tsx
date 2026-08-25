@@ -15,7 +15,7 @@ export default function Navbar() {
     return (
         <nav className="navbar" aria-label="navigation">
             <Link to={'/'} className="logo-link">
-                <h1 className="logo">Learn With Lyrics</h1>
+                <span className="logo">Learn With Lyrics</span>
             </Link>
             
             
@@ -45,9 +45,9 @@ export default function Navbar() {
             />
 
             <div className="current-langs">
-                <img className="flag" src="/flags/china_flag.png"></img>
-                <IoArrowForward className="large-icons" />
-                <img className="flag" src="/flags/uk_flag.png"></img>
+                <img className="flag" src="/flags/china_flag.png" alt="Chinese"></img>
+                <IoArrowForward className="large-icons" aria-hidden="true" />
+                <img className="flag" src="/flags/uk_flag.png" alt="English"></img>
             </div>
         </nav>
     )
