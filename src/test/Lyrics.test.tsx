@@ -41,7 +41,7 @@ describe('Lyrics', () => {
             { id: 'lrc_1', start_time: 1000, text: 'Second line' },
         ];
 
-        render(<Lyrics lyrics={lyrics} showPronunciation={false} />);
+        render(<Lyrics lyrics={lyrics} showPronunciation={false} onLookup={vi.fn()} />);
 
         // tokens should appear as separate text/spans
         expect(await screen.findByText('Hello')).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('Lyrics', () => {
     });
 
     test('renders nothing when no lyrics provided', () => {
-        render(<Lyrics lyrics={[]} showPronunciation={false} />);
+        render(<Lyrics lyrics={[]} showPronunciation={false} onLookup={vi.fn()} />);
         // no paragraphs should be present
         const paragraphs = document.querySelectorAll('p.song-lyrics');
         expect(paragraphs.length).toBe(0);
@@ -73,7 +73,7 @@ describe('Lyrics', () => {
     test('shows pronunciation when enabled', async () => {
         const lyrics = [{ id: 'lrc_0', start_time: 0, text: '你好 world' }];
 
-        render(<Lyrics lyrics={lyrics} showPronunciation={true} />);
+        render(<Lyrics lyrics={lyrics} showPronunciation={true} onLookup={vi.fn()} />);
 
         // tokenization is mocked; wait for tokens and pronunciation spans
         expect(await screen.findByText('你好')).toBeInTheDocument();

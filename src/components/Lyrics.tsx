@@ -11,7 +11,7 @@ export interface TokenizedLyric extends LyricsDict{
 interface LyricsProps {
     lyrics: LyricsDict[],
     showPronunciation: boolean,
-    onLookup?: (word: string, trigger: HTMLElement) => void
+    onLookup: (word: string, trigger: HTMLElement) => void
 }
 
 function isWhitespace(token: ChineseToken) {
@@ -22,13 +22,7 @@ export function Lyrics({ lyrics, showPronunciation, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
 
     function handleLookup(word: string, trigger: HTMLElement) {
-        // TODO: look up word in dictionary, show pop up 
-        if (typeof onLookup === 'function') {
-            onLookup(word, trigger);
-        } else {
-            // if lookup function not supplied
-            console.log(word);
-        }
+        onLookup(word, trigger);
     }
 
     // triggered on change of lyrics prop to component

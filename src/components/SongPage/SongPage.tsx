@@ -94,11 +94,6 @@ export default function SongPage() {
         setShowPronunciation(event.target.checked);
     }
 
-    // to handle displaying info about clicked vocabulary
-    // const lookupWord = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     setVocabWord()
-    // }
-
     // fetch lyrics from API on initial render
     useEffect(() => {
         if (!song_info) {
@@ -172,6 +167,7 @@ export default function SongPage() {
         );
     }
 
+    // keep track of which word was selected for lookup
     const handleLookup = (word: string, trigger: HTMLElement) => {
         lookupTriggerRef.current = trigger;
         setVocabWord(word);
