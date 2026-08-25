@@ -27,18 +27,28 @@ function Home() {
   // filter songs based on user input to search bar
   const valid_songs = useMemo(() => {
     return song_list.filter((song) => 
-    song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()))
+    song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.artist.toLowerCase().includes(debouncedSearchText.toLowerCase()))
   }, [debouncedSearchText]);
 
 
   return (
-    <>
-      
+    <main>
+      <h1>Browse songs</h1>
       <SearchBar searchText={searchText} handleSearch={handleSearch}/>
       <section id="center">
-        <div className="songs-list">
-          {valid_songs.map((song) => (
-            <Link to={`/songs/${song.id}`} className="card-link" key={song.id}>
+        <h2 className="visually-hidden">Song results</h2>
+        <p className="results-status" aria-live="polite" aria-atomic="true">
+          {valid_songs.length === 0
+            ? 'No songs found.'
+            : `${valid_songs.length} ${valid_songs.length === 1 ? 'song' : 'songs'} found.`}
+        </p>
+        {valid_songs.length === 0 ? (
+          <p role="status">Try searching for a different song title.</p>
+        ) : (
+          <ul className="songs-list">
+            {valid_songs.map((song) => (
+              <li key={song.id}>
+                <Link to={`/songs/${song.id}`} className="card-link">
                 <SongCard
                 title={song.title}
                 eng_title={song.eng_title}
@@ -46,14 +56,16 @@ function Home() {
                 img={song.img}
                 language={song.language}
                 />
-            </Link>
+                </Link>
+              </li>
 
-          ))}
-        </div>
+            ))}
+          </ul>
+        )}
 
       </section>
 
-    </>
+    </main>
   )
 }
 

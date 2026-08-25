@@ -56,7 +56,8 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
         <div className="vocab-info-box">
             <IconButton aria-label="close" 
                 className="close-button"
-                onClick={closeInfo}>
+                onClick={closeInfo}
+                tabIndex={0}>
                 <IoClose />
             </IconButton>
 

@@ -37,6 +37,21 @@ describe('Home', () => {
         expect(screen.getByText('Sun and Earth')).toBeInTheDocument();
     })
 
+    test('provides accessible structure for song results', () => {
+        render(
+            <MemoryRouter>
+                <Home />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole('main')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Browse songs', level: 1 })).toBeInTheDocument();
+        expect(screen.getByRole('list')).toBeInTheDocument();
+        expect(screen.getAllByRole('listitem')).toHaveLength(3);
+        expect(screen.getByText('3 songs found.')).toHaveAttribute('aria-live', 'polite');
+        expect(screen.getByRole('heading', { name: 'Test Song Two', level: 2 })).toHaveAttribute('lang', 'zh');
+    })
+
     test('each song card link points to the song route', () => {
         render(
             <MemoryRouter>
@@ -67,6 +82,23 @@ describe('Home', () => {
         expect(screen.getByText('Sun and Earth')).toBeInTheDocument();
         expect(screen.queryByText('Test Song One')).toBeNull();
         expect(screen.queryByText('Test Song Two')).toBeNull();
+    })
+
+    test('shows an accessible message when no songs match', async () => {
+        render(
+            <MemoryRouter>
+                <Home />
+            </MemoryRouter>
+        );
+
+        const search = screen.getByLabelText('search-bar');
+        fireEvent.change(search, { target: { value: 'missing song' } });
+
+        await new Promise((r) => setTimeout(r, 350));
+
+        expect(screen.getByText('No songs found.')).toHaveAttribute('aria-live', 'polite');
+        expect(screen.getByRole('status')).toHaveTextContent('Try searching for a different song title.');
+        expect(screen.queryByRole('list')).toBeNull();
     })
 });
 

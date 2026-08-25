@@ -15,6 +15,17 @@ describe('Navbar', () => {
         expect(languageSelect).toBeInTheDocument();
     });
 
+    test('provides alternatives for language flags', () => {
+        render(
+            <MemoryRouter>
+                <Navbar />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole('img', { name: 'Chinese' })).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: 'English' })).toBeInTheDocument();
+    });
+
     test('user can select different language', async () => {
         const user = userEvent.setup();
         render(

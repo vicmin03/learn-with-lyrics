@@ -42,6 +42,8 @@
 
 .logo {
   flex: 2;
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .logo-link {
@@ -61,6 +63,11 @@
 .select .MuiSelect-select {
   border-color: transparent;
   font-size: 120%;
+}
+
+.select .MuiSelect-select:focus-visible {
+  border: 2px solid darkblue;
+  border-radius: 5px;
 }
 
 .current-langs {
@@ -144,6 +151,13 @@
   width: 95%;
   max-width: 1200px;
   align-items: stretch;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.songs-list > li {
+  display: flex;
 }
 
 .search {
@@ -160,12 +174,34 @@
 .card-link {
   text-decoration: none;
   color: inherit;
-  
+  display: block;
+  width: 100%;
 }
 
 .card-link:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-link:focus-visible {
+  outline: 3px solid darkblue;
+  outline-offset: 4px;
+}
+
+.results-status {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* .song-lyrics {

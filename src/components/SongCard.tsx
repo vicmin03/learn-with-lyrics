@@ -6,15 +6,24 @@ interface CardProps {
     language: string
 }
 
+const languageCodes: Record<string, string> = {
+    Chinese: 'zh',
+    English: 'en',
+    Japanese: 'ja',
+    Korean: 'ko',
+};
+
 export default function SongCard (props: CardProps) {
+    const languageCode = languageCodes[props.language];
+
     return (
         <div className="song-card">
             <div className="song-cover">
                 <img src={props.img} alt={props.title} />
             </div>
             <div className='song-info'>
-                <p className="song-title">{props.title}</p>
-                {props.eng_title && <p className="song-title">({props.eng_title})</p>}
+                <h2 className="song-title" lang={languageCode}>{props.title}</h2>
+                {props.eng_title && <p className="song-title" lang="en">({props.eng_title})</p>}
                 <p>{props.artist}</p>
                 <p>{props.language}</p>
             </div>
