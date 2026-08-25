@@ -5,6 +5,25 @@
   line-height: 1.3;
 }
 
+.lyrics-token {
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lyrics-token:hover {
+  text-decoration: underline;
+}
+
+.lyrics-token:focus-visible {
+  outline: 3px solid darkblue;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .song-page-header {
   display: flex;
   align-items: center;
@@ -16,14 +35,22 @@
 
 .song-page-info {
   flex: 1 1 500px;
+  display: flex;
   flex-direction: row;
+  align-items: baseline;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .song-page-title {
-  margin-right: 1rem;
+  margin: 0 1rem 0 0;
   text-align: left;
+  font-size: 40px;
+  line-height: 1.3;
+}
+
+.song-page-alt-title {
+  margin: 1rem 1rem 0 0;
   font-size: 40px;
   line-height: 1.3;
 }
@@ -32,11 +59,33 @@
   text-align: right;
   font-size: 20px;
   align-self: center;
-  /* margin: 2rem; */
+  margin-top: 2rem;
   color: rgb(116, 116, 116);
 }
 
 .song-page-main {
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .song-page-header {
+    padding: 1rem;
+  }
+
+  .song-page-title,
+  .song-page-alt-title {
+    font-size: 32px;
+  }
+
+  .song-page-main {
+    flex-direction: column;
+  }
+
+  .song-lyrics {
+    font-size: 2rem;
+    margin: 1rem;
+  }
 }

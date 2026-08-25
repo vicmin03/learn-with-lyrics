@@ -46,10 +46,10 @@ describe('Song Page', () => {
         vi.stubGlobal('fetch', fetchMock);
 
         render(
-            <MemoryRouter initialEntries={["/song/1"]}>
+            <MemoryRouter initialEntries={["/songs/1"]}>
                 <SettingsProvider>
                     <Routes>
-                        <Route path="/song/:song_id" element={<SongPage />} />
+                        <Route path="/songs/:song_id" element={<SongPage />} />
                     </Routes>
                 </SettingsProvider>
             </MemoryRouter>
@@ -78,10 +78,10 @@ describe('Song Page', () => {
         vi.stubGlobal('fetch', fetchMock);
 
         render(
-            <MemoryRouter initialEntries={["/song/1"]}>
+            <MemoryRouter initialEntries={["/songs/1"]}>
                 <SettingsProvider>
                     <Routes>
-                        <Route path="/song/:song_id" element={<SongPage />} />
+                        <Route path="/songs/:song_id" element={<SongPage />} />
                     </Routes>
                 </SettingsProvider>
             </MemoryRouter>
@@ -93,10 +93,10 @@ describe('Song Page', () => {
 
     test('renders Song not found for invalid id', () => {
         render(
-            <MemoryRouter initialEntries={["/song/999"]}>
+            <MemoryRouter initialEntries={["/songs/999"]}>
                 <SettingsProvider>
                     <Routes>
-                        <Route path="/song/:song_id" element={<SongPage />} />
+                        <Route path="/songs/:song_id" element={<SongPage />} />
                     </Routes>
                 </SettingsProvider>
             </MemoryRouter>
@@ -113,10 +113,10 @@ describe('Song Page', () => {
         vi.stubGlobal('fetch', fetchMock);
 
         render(
-            <MemoryRouter initialEntries={["/song/1"]}>
+            <MemoryRouter initialEntries={["/songs/1"]}>
                 <SettingsProvider>
                     <Routes>
-                        <Route path="/song/:song_id" element={<SongPage />} />
+                        <Route path="/songs/:song_id" element={<SongPage />} />
                     </Routes>
                 </SettingsProvider>
             </MemoryRouter>
@@ -140,10 +140,10 @@ describe('Song Page', () => {
         vi.stubGlobal('fetch', fetchMock);
 
         render(
-            <MemoryRouter initialEntries={["/song/1"]}>
+            <MemoryRouter initialEntries={["/songs/1"]}>
                 <SettingsProvider>
                     <Routes>
-                        <Route path="/song/:song_id" element={<SongPage />} />
+                        <Route path="/songs/:song_id" element={<SongPage />} />
                     </Routes>
                 </SettingsProvider>
             </MemoryRouter>

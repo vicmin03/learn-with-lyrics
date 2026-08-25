@@ -11,7 +11,7 @@ export interface TokenizedLyric extends LyricsDict{
 interface LyricsProps {
     lyrics: LyricsDict[],
     showPronunciation: boolean,
-    onLookup?: (word: string) => void
+    onLookup?: (word: string, trigger: HTMLElement) => void
 }
 
 function isWhitespace(token: ChineseToken) {
@@ -21,10 +21,10 @@ function isWhitespace(token: ChineseToken) {
 export function Lyrics({ lyrics, showPronunciation, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
 
-    function handleLookup(word: string) {
+    function handleLookup(word: string, trigger: HTMLElement) {
         // TODO: look up word in dictionary, show pop up 
         if (typeof onLookup === 'function') {
-            onLookup(word);
+            onLookup(word, trigger);
         } else {
             // if lookup function not supplied
             console.log(word);
@@ -62,14 +62,16 @@ export function Lyrics({ lyrics, showPronunciation, onLookup }: LyricsProps) {
                                 key={`${line.id}-${token.start}`}
                                 className="lyrics-token-container"
                             >
-                                {showPronunciation && <span className="pronunciation-text">
+                                {showPronunciation && <span className="pronunciation-text" lang="zh-Latn">
                                     {pinyin(token.word)}
                                 </span>}
-                                <span 
+                                <button
+                                    type="button"
                                     className="lyrics-token"
-                                    onClick={() => handleLookup(token.word)}>
+                                    lang="zh"
+                                    onClick={(event) => handleLookup(token.word, event.currentTarget)}>
                                     {token.word}
-                                </span>
+                                </button>
                             </span>
                             )   
                         }

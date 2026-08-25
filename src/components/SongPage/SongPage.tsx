@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
 import song_list from '../../song_list.json';
@@ -71,6 +71,7 @@ export default function SongPage() {
 
     // manages vocab word that user clicks
     const [vocabWord, setVocabWord] = useState("");
+    const lookupTriggerRef = useRef<HTMLElement | null>(null);
 
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
@@ -82,6 +83,11 @@ export default function SongPage() {
         // simplifiedCharacters,
         // setSimplifiedCharacters,
     } = useSettings();
+
+    const closeVocabInfo = useCallback(() => {
+        setVocabWord("");
+        lookupTriggerRef.current?.focus();
+    }, []);
 
     // to toggle showing pronunciation above song lyrics
     const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,30 +164,40 @@ export default function SongPage() {
     }, [song_info]);
 
     if (!song_info) {
-        return <p>Song not found.</p>;
+        return (
+            <main>
+                <h1>Song not found.</h1>
+                <p>The requested song could not be found.</p>
+            </main>
+        );
     }
 
+    const handleLookup = (word: string, trigger: HTMLElement) => {
+        lookupTriggerRef.current = trigger;
+        setVocabWord(word);
+    };
+
     return (
-        <>
+        <main>
             <div className="song-page-header">
                 <div className="song-page-info">
-                    <h1 className="song-page-title">{song_info.title}</h1>
-                    {song_info.eng_title && <h1 className="song-page-title">({song_info.eng_title})</h1>}
-                    <h4 className="song-page-artist">{song_info.artist}</h4>
+                    <h1 className="song-page-title" lang="zh">{song_info.title}</h1>
+                    {song_info.eng_title && <p className="song-page-alt-title" lang="en">({song_info.eng_title})</p>}
+                    <p className="song-page-artist">{song_info.artist}</p>
                 </div>
 
                 <div className="settings-bar">
                     {hasTimestamps && <div className="icon-and-text">
-                            <IoCheckmarkCircleOutline className="small-icon"/>
+                            <IoCheckmarkCircleOutline className="small-icon" aria-hidden="true"/>
                             <p>Has timed lyrics</p>
                         </div>}
-                    <span>Pinyin: Off</span>
+                    <span id="pronunciation-label">Show pronunciation</span>
                     <Switch 
-                        aria-label="Toggle displaying pronunciation"
+                        aria-labelledby="pronunciation-label pronunciation-state"
                         checked = {showPronunciation} 
                         onChange = {togglePronunciation} 
                     />
-                    <span>On</span>
+                    <span id="pronunciation-state">{showPronunciation ? 'On' : 'Off'}</span>
                 </div>
             </div>
 
@@ -189,12 +205,14 @@ export default function SongPage() {
 
             <div className="song-page-main">
                 {isLoading ? (
-                    <p>Loading lyrics...</p>
+                    <p role="status" aria-live="polite">Loading lyrics...</p>
                 ) : errorMessage ? (
-                    <p>{errorMessage}</p>
+                    <p role="alert">{errorMessage}</p>
+                ) : songLyrics.length === 0 ? (
+                    <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
                 ) : (
                     <>
-                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} onLookup={setVocabWord} />
+                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} onLookup={handleLookup} />
                     </>
                 )}
 
@@ -202,12 +220,12 @@ export default function SongPage() {
                     <VocabInfo
                         key={vocabWord}
                         vocab={vocabWord}
-                        onClose={() => setVocabWord("")}
+                        onClose={closeVocabInfo}
                     />
                 )}
 
             </div>
 
-        </>
+        </main>
     );
 }

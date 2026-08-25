@@ -1,6 +1,6 @@
 import './VocabInfo.css';
 import '../../App.css';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconButton, Button, Link } from '@mui/material';
 import { IoClose } from "react-icons/io5";
 import { IoIosLink } from "react-icons/io";
@@ -17,6 +17,25 @@ interface VocabInfoProps {
 
 export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
     const [addedVocab, setAddedVocab] = useState<string | null>(null);
+    const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+    const onCloseRef = useRef(onClose);
+
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
+
+    useEffect(() => {
+        closeButtonRef.current?.focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onCloseRef.current();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     function lookupWord(word: string): string[] {
         // if returning null, might need to split further into individual charas
@@ -53,12 +72,12 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
     const addToDeckText = addedVocab === vocab ? "Word added to deck" : "Add To Deck";
 
     return (
-        <div className="vocab-info-box">
+        <aside className="vocab-info-box" aria-labelledby="vocab-panel-heading">
             <IconButton aria-label="close" 
                 className="close-button"
                 onClick={closeInfo}
-                tabIndex={0}>
-                <IoClose />
+                ref={closeButtonRef}>
+            <IoClose aria-hidden="true" />
             </IconButton>
 
             <Link href={`${DICT_URL}/#sk=${vocab}&svt=pinyin`} 
@@ -66,11 +85,11 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
                 target="_blank"
                 className="dict-link"
                 aria-label="Link to external Chinese Dictionary site 'Written Chinese">
-                <IoIosLink /> WC Dict
+                <IoIosLink aria-hidden="true" /> WC Dict
             </Link>
 
             <p className="vocab-pronunciation">{pinyin(vocab)}</p>
-            <h3 className="vocab-word">{vocab}</h3>
+            <h2 id="vocab-panel-heading" className="vocab-word" lang="zh">{vocab}</h2>
 
             {definition.length > 0 ? (
                 <ul>
@@ -87,6 +106,6 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
                 {addToDeckText}
             </Button>
 
-        </div>
+        </aside>
     )
 }

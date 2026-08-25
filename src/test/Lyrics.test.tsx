@@ -60,7 +60,7 @@ describe('Lyrics', () => {
         const token = await screen.findByText('Click');
         await userEvent.click(token);
 
-        expect(mockLookup).toHaveBeenCalledWith('Click');
+        expect(mockLookup).toHaveBeenCalledWith('Click', token);
     });
 
     test('renders nothing when no lyrics provided', () => {
