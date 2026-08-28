@@ -80,8 +80,8 @@ export default function SongPage() {
     const {
         showPronunciation,
         setShowPronunciation,
-        // simplifiedCharacters,
-        // setSimplifiedCharacters,
+        simplifiedCharacters,
+        setSimplifiedCharacters,
     } = useSettings();
 
     const closeVocabInfo = useCallback(() => {
@@ -92,6 +92,11 @@ export default function SongPage() {
     // to toggle showing pronunciation above song lyrics
     const togglePronunciation = (event: React.ChangeEvent<HTMLInputElement>) => {
         setShowPronunciation(event.target.checked);
+    }
+
+    // to toggle showing lyrics in simplified or traditional script
+    const toggleSimplified = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSimplifiedCharacters(event.target.checked);
     }
 
     // fetch lyrics from API on initial render
@@ -193,7 +198,16 @@ export default function SongPage() {
                         checked = {showPronunciation} 
                         onChange = {togglePronunciation} 
                     />
+
                     <span id="pronunciation-state">{showPronunciation ? 'On' : 'Off'}</span>
+                    
+                    <span id="pronunciation-label">Script</span>
+                    <Switch 
+                        aria-labelledby="script-label script-state"
+                        checked = {simplifiedCharacters} 
+                        onChange = {toggleSimplified} 
+                    />
+                    <span id="pronunciation-state">{simplifiedCharacters ? 'Simplified' : 'Traditional'}</span>
                 </div>
             </div>
 
@@ -208,7 +222,7 @@ export default function SongPage() {
                     <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
                 ) : (
                     <>
-                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} onLookup={handleLookup} />
+                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} simplifiedCharacters={simplifiedCharacters} origScript={song_info.orig_script} onLookup={handleLookup} />
                     </>
                 )}
 

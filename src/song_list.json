@@ -5,7 +5,8 @@
         "eng_title":"Unbreakable Love",
         "artist":"Eric Chou",
         "img":"/song_covers/unbreakable_love.jpg",
-        "language":"Chinese"
+        "language":"Chinese",
+        "orig_script": "tw"
     },
     {
         "id": 2,
@@ -13,7 +14,8 @@
         "eng_title":"Red Scarf",
         "artist":"WeiBird",
         "img":"/song_covers/red_scarf.jpg",
-        "language":"Chinese"
+        "language":"Chinese",
+        "orig_script":"tw"
     },
     {
         "id": 3,
@@ -21,6 +23,17 @@
         "eng_title":"Sun and Earth",
         "artist":"Crowd Lu",
         "img":"/song_covers/sun_and_earth.jpg",
-        "language":"Chinese"
+        "language":"Chinese",
+        "orig_script": "tw"
+    },
+    {
+        "id": 4,
+        "title": "戒烟",
+        "eng_title":"Quit Smoking",
+        "artist":"李荣浩",
+        "img":"/song_covers/quit_smoking.png",
+        "language":"Chinese",
+        "orig_script": "cn"
     }
+
 ]

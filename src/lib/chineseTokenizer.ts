@@ -29,12 +29,14 @@ export type ChineseToken = {
     end: number;
 };
 
-// function to split text into tokens
-// export async function tokenizeChinese(text: string): Promise<ChineseToken[]> {
-//     await ensureInitialized();
-
-//     return tokenize(text, "default", true) as ChineseToken[];
-// }
+// format of tokens for supporting multiple scripts
+export type ScriptToken = {
+    simplified: string;
+    traditional: string;
+    pinyin: string;
+    start: number;
+    end: number;
+}
 
 export async function tokenizeChinese(text: string): Promise<ChineseToken[]> {
     const tokens = await initialiseTokens(text);
