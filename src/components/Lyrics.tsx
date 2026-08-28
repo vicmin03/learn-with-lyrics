@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { pinyin } from "pinyin-pro";
 import { ChineseToken, tokenizeChinese } from "../lib/chineseTokenizer";
 import { LyricsDict } from "../types/lyrics";
-import { convert } from "../lib/convertScript";
+import { convert, createConverter } from "../lib/convertScript";
 
 
 export interface TokenizedLyric extends LyricsDict{
@@ -23,14 +23,28 @@ function isWhitespace(token: ChineseToken) {
 
 export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
-    const [currentScript, setCurrentScript] = useState<string>(origScript);
 
+    const currentScript = simplifiedCharacters ? 'cn' : (origScript==='cn' ? 'tw' : origScript)
+  
     // store converted (cn/tw) lyrics for quick reloading
     let convertedLyricsRef = useRef<LyricsDict[] | null>(null);
+
+    // always use simplified lyrics for tokenization
+    const simplifiedLyrics = useMemo(() => {
+        const toSimplified = origScript === "cn"
+            ? (text: string) => text
+            : createConverter(origScript, "cn");
+
+        return lyrics.map((line) => ({
+            ...line,
+            text: toSimplified(line.text)
+        }));
+    }, [lyrics, origScript])
 
     // the target script to convert between (simplified and corresponding traditional) 
     let targetScript = origScript==='cn' ? 'tw' : 'cn'
 
+    // for handling looking up vocabulary
     function handleLookup(word: string, trigger: HTMLElement) {
         onLookup(word, trigger);
     }
@@ -38,42 +52,52 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
     // triggered on change of lyrics prop to component
     useEffect(() => {
 
-        setCurrentScript(simplifiedCharacters ? 'cn' : (origScript==='cn' ? 'tw' : origScript))
+        let cancelled = false;
 
-        const needsConversion =
-            (simplifiedCharacters && origScript !== "cn") ||
-            (!simplifiedCharacters && origScript === "cn");
-
-
-        // if haven't converted lyrics script before, then convert and save with useRef so it persists        
-        if (needsConversion && convertedLyricsRef.current === null) {
-            convertedLyricsRef.current = lyrics.map((line) => ({
-                ...line, 
-                text: convert(line.text, origScript, targetScript)
-            }))        
-        }
-
-        const lyricsToTokenize = needsConversion
-            ? convertedLyricsRef.current ?? lyrics
-            : lyrics;
-
-        // tokenize each line of the lyrics, preserving timestamps
+        // tokenize each line of the simplified lyrics, preserving timestamps
         async function tokenizeLyrics() {
             const result = await Promise.all(
-                lyricsToTokenize.map(async (line) => ({
+                simplifiedLyrics.map(async (line) => ({
                     ...line, 
                     tokens: await tokenizeChinese(line.text),
                 }))
             );
 
-            setTokenizedLyrics(result);
+            if (!cancelled) {
+                setTokenizedLyrics(result);
+            }
         }
         tokenizeLyrics();
-    }, [lyrics, simplifiedCharacters, origScript]);
+
+        // clean up function
+        return () => {
+            cancelled = true;
+        };
+    }, [lyrics, origScript]);
+
+    const traditionalConverter = useMemo(
+        () => createConverter("cn", "tw"),
+        []
+    );
+
+    // control which tokens/script to display in lyrics
+    const displayTokens = useMemo(() => {
+        if (simplifiedCharacters) {
+            return tokenizedLyrics;
+        }
+        // to display traditional lyrics matching tokens
+        return tokenizedLyrics.map((line) => ({
+            ...line,
+            tokens: line.tokens.map((token) => ({
+                ...token,
+                word: traditionalConverter(token.word)
+            }))
+        }))
+    }, [tokenizedLyrics, simplifiedCharacters])
 
     return (
         <div>
-            {tokenizedLyrics.map((line) => (
+            {displayTokens.map((line) => (
                 <p key={line.id} className="song-lyrics">
                     {line.tokens.map((token) => {
                         if (isWhitespace(token)) {
@@ -93,7 +117,7 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
                                     className="lyrics-token"
                                     lang="zh"
                                     onClick={(event) => handleLookup(token.word, event.currentTarget)}>
-                                    {token.word}
+                                    {token.word}                                
                                 </button>
                             </span>
                             )   
