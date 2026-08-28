@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { pinyin } from "pinyin-pro";
 import { ScriptToken, tokenizeChinese } from "../lib/chineseTokenizer";
 import { LyricsDict } from "../types/lyrics";
@@ -50,7 +50,7 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
 
                     // convert the complete line once, rather than each token
                     const traditionalText =
-                        origScript === "tw" || "hk"
+                        origScript === "tw" || origScript === "hk"
                             ? originalLine.text
                             : toTraditional(simplifiedText);
 

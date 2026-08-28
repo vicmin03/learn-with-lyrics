@@ -153,7 +153,7 @@ describe('Song Page', () => {
         expect(await screen.findByText('Hello')).toBeInTheDocument();
 
         // find the switch and toggle it (MUI renders a switch role)
-        const toggle = screen.getByRole('switch');
+        const toggle = screen.getAllByRole('switch')[0];
 
         expect(toggle).not.toBeChecked();
         await userEvent.click(toggle);
@@ -161,5 +161,39 @@ describe('Song Page', () => {
 
         // pronunciation text should appear (from mocked pinyin-pro)
         expect(await screen.findByText('py(Hello)')).toBeInTheDocument();
+    });
+
+    test('toggles between simplified and traditional lyrics', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                data: {
+                    hasTimestamps: false,
+                    lyrics: '愛',
+                },
+            }),
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/songs/1"]}>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/songs/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText('爱')).toBeInTheDocument();
+
+        const switches = screen.getAllByRole('switch');
+        const scriptToggle = switches[1];
+
+        expect(scriptToggle).toBeChecked();
+        await userEvent.click(scriptToggle);
+
+        expect(scriptToggle).not.toBeChecked();
+        expect(await screen.findByText('愛')).toBeInTheDocument();
     });
 });
