@@ -14,12 +14,8 @@ export const scripts: Record<'cn' | 'tw' | 'hk', string> = {
     'hk': 'Traditional (Hong Kong)'
 }
 
+// create a converter between two scripts and return a function to convert some text
 export function createConverter(from: string, to: string) {
     const converter = OpenCC.Converter({from: from, to: to});
     return (text: string) => converter(text);
-}
-
-export function convert(text: string, from: string, to: string): string{
-    const converter = OpenCC.Converter({from: from, to: to});
-    return converter(text);
 }

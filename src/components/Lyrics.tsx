@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { pinyin } from "pinyin-pro";
-import { ChineseToken, tokenizeChinese } from "../lib/chineseTokenizer";
+import { ScriptToken, tokenizeChinese } from "../lib/chineseTokenizer";
 import { LyricsDict } from "../types/lyrics";
-import { convert, createConverter } from "../lib/convertScript";
+import { createConverter } from "../lib/convertScript";
 
 
 export interface TokenizedLyric extends LyricsDict{
-    tokens: ChineseToken[]
+    tokens: ScriptToken []
 }
 
 interface LyricsProps {
@@ -17,92 +17,85 @@ interface LyricsProps {
     onLookup: (word: string, trigger: HTMLElement) => void
 }
 
-function isWhitespace(token: ChineseToken) {
-    return /^\s+$/.test(token.word);
+function isWhitespace(token: ScriptToken) {
+    return /^\s+$/.test(token.simplified);
 }
 
 export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
-
-    const currentScript = simplifiedCharacters ? 'cn' : (origScript==='cn' ? 'tw' : origScript)
-  
-    // store converted (cn/tw) lyrics for quick reloading
-    let convertedLyricsRef = useRef<LyricsDict[] | null>(null);
-
-    // always use simplified lyrics for tokenization
-    const simplifiedLyrics = useMemo(() => {
-        const toSimplified = origScript === "cn"
-            ? (text: string) => text
-            : createConverter(origScript, "cn");
-
-        return lyrics.map((line) => ({
-            ...line,
-            text: toSimplified(line.text)
-        }));
-    }, [lyrics, origScript])
-
-    // the target script to convert between (simplified and corresponding traditional) 
-    let targetScript = origScript==='cn' ? 'tw' : 'cn'
 
     // for handling looking up vocabulary
     function handleLookup(word: string, trigger: HTMLElement) {
         onLookup(word, trigger);
     }
 
-    // triggered on change of lyrics prop to component
+    // set up lyrics for toggling pronunciation and script
+    // convert between simplified and traditional and prepare pinyin into token for quick conversion
     useEffect(() => {
-
         let cancelled = false;
 
-        // tokenize each line of the simplified lyrics, preserving timestamps
-        async function tokenizeLyrics() {
+        async function prepareLyrics() {
+            // create converters 
+            const toSimplified =
+                origScript === "cn"
+                    ? (text: string) => text
+                    : createConverter(origScript, "cn");
+
+            const toTraditional = createConverter("cn", "tw");
+
             const result = await Promise.all(
-                simplifiedLyrics.map(async (line) => ({
-                    ...line, 
-                    tokens: await tokenizeChinese(line.text),
-                }))
+                lyrics.map(async (originalLine) => {
+                    // convert to simplified for better tokenization
+                    const simplifiedText = toSimplified(originalLine.text);
+
+                    // convert the complete line once, rather than each token
+                    const traditionalText =
+                        origScript === "tw" || "hk"
+                            ? originalLine.text
+                            : toTraditional(simplifiedText);
+
+                    const baseTokens = await tokenizeChinese(simplifiedText);
+
+                    // construct token with all info needed
+                    const tokens = baseTokens.map((token) => ({
+                        start: token.start,
+                        end: token.end,
+                        simplified: token.word,
+                        traditional: traditionalText.slice(token.start, token.end),
+                        pinyin: pinyin(token.word),
+                    }));
+
+                    return {
+                        ...originalLine,
+                        tokens,
+                    };
+                })
             );
 
             if (!cancelled) {
                 setTokenizedLyrics(result);
             }
         }
-        tokenizeLyrics();
 
-        // clean up function
+        prepareLyrics();
+
         return () => {
             cancelled = true;
         };
     }, [lyrics, origScript]);
 
-    const traditionalConverter = useMemo(
-        () => createConverter("cn", "tw"),
-        []
-    );
-
-    // control which tokens/script to display in lyrics
-    const displayTokens = useMemo(() => {
-        if (simplifiedCharacters) {
-            return tokenizedLyrics;
-        }
-        // to display traditional lyrics matching tokens
-        return tokenizedLyrics.map((line) => ({
-            ...line,
-            tokens: line.tokens.map((token) => ({
-                ...token,
-                word: traditionalConverter(token.word)
-            }))
-        }))
-    }, [tokenizedLyrics, simplifiedCharacters])
-
     return (
         <div>
-            {displayTokens.map((line) => (
+            {tokenizedLyrics.map((line) => (
                 <p key={line.id} className="song-lyrics">
                     {line.tokens.map((token) => {
                         if (isWhitespace(token)) {
-                            return token.word;
+                            return " ";
                         }
+
+                        const displayedWord = simplifiedCharacters
+                            ? token.simplified
+                            : token.traditional;
 
                         return (
                             <span
@@ -110,14 +103,14 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
                                 className="lyrics-token-container"
                             >
                                 {showPronunciation && <span className="pronunciation-text" lang="zh-Latn">
-                                    {pinyin(token.word)}
+                                    {token.pinyin}
                                 </span>}
                                 <button
                                     type="button"
                                     className="lyrics-token"
                                     lang="zh"
-                                    onClick={(event) => handleLookup(token.word, event.currentTarget)}>
-                                    {token.word}                                
+                                    onClick={(event) => handleLookup(displayedWord, event.currentTarget)}>
+                                    {displayedWord}                                
                                 </button>
                             </span>
                             )   
