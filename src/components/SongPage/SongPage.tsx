@@ -7,6 +7,7 @@ import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
+import Youtube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 import './SongPage.css';
 
 
@@ -73,6 +74,9 @@ export default function SongPage() {
     const [vocabWord, setVocabWord] = useState("");
     const lookupTriggerRef = useRef<HTMLElement | null>(null);
 
+    // manages music player state
+    const [player, setPlayer] = useState<YouTubePlayer>();
+
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
 
@@ -120,7 +124,6 @@ export default function SongPage() {
                 }
 
                 const json = await response.json();
-                console.log(json.data);
                 const hasTimestamp = Boolean(json.data.hasTimestamps);
 
                 // store lyrics as array of lyrics dictionaries
@@ -234,6 +237,29 @@ export default function SongPage() {
                     />
                 )}
 
+            </div>
+
+            <div className="song-page-player">
+                <Youtube videoId="PtOY_rgfNoM" 
+                    opts={{
+                        width: '600',
+                        height: '400',
+                        playerVars: {
+                            autoplay: 0,
+                            origin: window.location.origin
+                        },
+            
+                    }}
+                    onReady={(event) => {
+                        console.log("YouTube ready");
+
+                        const player = event.target;
+
+                        console.log("Duration:", player.getDuration());
+
+                        setPlayer(player);
+                    }}
+                />
             </div>
 
         </main>
