@@ -1,5 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
+import type { YouTubeEvent } from "react-youtube";
 
 import useYouTubePlayer from "../../hooks/useYoutubePlayer";
 
@@ -22,7 +23,7 @@ describe("useYouTubePlayer", () => {
     act(() => {
       result.current.onReady({
         target: player,
-      } as any);
+      } as unknown as YouTubeEvent);
     });
 
     expect(result.current.ready).toBe(true);
@@ -40,7 +41,7 @@ describe("useYouTubePlayer", () => {
     act(() => {
       result.current.onReady({
         target: player,
-      } as any);
+      } as unknown as YouTubeEvent);
     });
 
     act(() => {
@@ -62,7 +63,7 @@ describe("useYouTubePlayer", () => {
     act(() => {
       result.current.onReady({
         target: player,
-      } as any);
+      } as unknown as YouTubeEvent);
     });
 
     expect(result.current.isPlaying).toBe(false);
@@ -92,7 +93,7 @@ describe("useYouTubePlayer", () => {
     act(() => {
       result.current.onReady({
         target: player,
-      } as any);
+      } as unknown as YouTubeEvent);
     });
 
     act(() => {
@@ -114,7 +115,7 @@ describe("useYouTubePlayer", () => {
     act(() => {
       result.current.onReady({
         target: player,
-      } as any);
+      } as unknown as YouTubeEvent);
     });
 
     act(() => {

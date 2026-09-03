@@ -7,7 +7,7 @@ import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
-import Youtube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
+import Youtube from 'react-youtube';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import { fetchVideoId } from '../../lib/youtubeSearch';
 import './SongPage.css';
@@ -76,7 +76,6 @@ export default function SongPage() {
     const lookupTriggerRef = useRef<HTMLElement | null>(null);
 
     // manages state for music player
-    const [player, setPlayer] = useState<YouTubePlayer>();
     const [ytVideoId, setYtVideoId] = useState("");
 
     // read info about song based on id (to be fetched from database)
@@ -110,9 +109,15 @@ export default function SongPage() {
     // fetch youtube url to display video embed on initial render
     useEffect( () => {
         async function fetchURL() {
-            if (song_info){
-                const videoId = await fetchVideoId(song_info.artist, song_info.title)
+            if (!song_info) {
+                return;
+            }
+
+            try {
+                const videoId = await fetchVideoId(song_info.artist, song_info.title);
                 setYtVideoId(videoId);
+            } catch (error) {
+                console.error('Failed to fetch YouTube video', error);
             }
         }
 
@@ -120,10 +125,6 @@ export default function SongPage() {
             fetchURL();
             // save newly fetched url to database for quicker retrieval next time
         }
-        else{
-            setYtVideoId(song_info.yt_url);
-        }
-
     }, [song_info])
 
     // fetch lyrics from API on initial render
@@ -263,7 +264,7 @@ export default function SongPage() {
             </div>
 
             <div className="song-page-player">
-                <Youtube videoId={ytVideoId} 
+                <Youtube videoId={ytVideoId || song_info.yt_url}
                     opts={{
                         width: '600',
                         height: '400',

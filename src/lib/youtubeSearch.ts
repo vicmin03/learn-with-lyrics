@@ -54,7 +54,6 @@ async function searchYoutube(artist: string, title: string) {
         videoEmbeddable: "true",
         videoSyndicated: "true",
     })
-    let call = `https://www.googleapis.com/youtube/v3/search?${params}`;
     const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?${params}`
     )
