@@ -27,6 +27,10 @@ vi.mock('../lib/chineseTokenizer', () => ({
     },
 }));
 
+vi.mock('../lib/youtubeSearch', () => ({
+    fetchVideoId: vi.fn().mockResolvedValue('test-video-id'),
+}));
+
 const { default: SongPage } = await import('../components/SongPage/SongPage');
 
 describe('Song Page', () => {

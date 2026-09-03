@@ -8,3 +8,5 @@
 - how to get album covers - yt music api?
 - potential issue with 了 - set as custom pinyin to default to le, but might not be able to handle cases where it is liao
 - how does it handle english lyrics? e.g. 刻在我心底的名字
+- song cards grid doesn't take up enough horizontal space and titles get cut off - have max 3 across with enough space
+- issue of sync with audio if music video and not just official audio

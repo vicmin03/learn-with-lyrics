@@ -7,8 +7,10 @@ import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
+import Youtube from 'react-youtube';
+import useYouTubePlayer from '../../hooks/useYoutubePlayer';
+import { fetchVideoId } from '../../lib/youtubeSearch';
 import './SongPage.css';
-
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -73,6 +75,9 @@ export default function SongPage() {
     const [vocabWord, setVocabWord] = useState("");
     const lookupTriggerRef = useRef<HTMLElement | null>(null);
 
+    // manages state for music player
+    const [ytVideoId, setYtVideoId] = useState("");
+
     // read info about song based on id (to be fetched from database)
     const song_info = song_list.find((song) => song.id.toString() === song_id);
 
@@ -99,6 +104,29 @@ export default function SongPage() {
         setSimplifiedCharacters(event.target.checked);
     }
 
+    const youtube = useYouTubePlayer();
+
+    // fetch youtube url to display video embed on initial render
+    useEffect( () => {
+        async function fetchURL() {
+            if (!song_info) {
+                return;
+            }
+
+            try {
+                const videoId = await fetchVideoId(song_info.artist, song_info.title);
+                setYtVideoId(videoId);
+            } catch (error) {
+                console.error('Failed to fetch YouTube video', error);
+            }
+        }
+
+        if (!song_info?.yt_url) {
+            fetchURL();
+            // save newly fetched url to database for quicker retrieval next time
+        }
+    }, [song_info])
+
     // fetch lyrics from API on initial render
     useEffect(() => {
         if (!song_info) {
@@ -120,7 +148,7 @@ export default function SongPage() {
                 }
 
                 const json = await response.json();
-                console.log(json.data);
+                console.log(json)
                 const hasTimestamp = Boolean(json.data.hasTimestamps);
 
                 // store lyrics as array of lyrics dictionaries
@@ -133,7 +161,6 @@ export default function SongPage() {
                     const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
                     // need to split lyric string into separate lines
                     lyric_lines = splitLyrics(lyrics, hasTimestamp);
-
                 }
                 
                 if (!isCancelled) {
@@ -234,6 +261,21 @@ export default function SongPage() {
                     />
                 )}
 
+            </div>
+
+            <div className="song-page-player">
+                <Youtube videoId={ytVideoId || song_info.yt_url}
+                    opts={{
+                        width: '600',
+                        height: '400',
+                        playerVars: {
+                            autoplay: 0,
+                            origin: window.location.origin
+                        },
+            
+                    }}
+                    onReady={youtube.onReady}
+                />
             </div>
 
         </main>

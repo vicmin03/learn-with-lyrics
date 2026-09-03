@@ -6,7 +6,8 @@
         "artist":"Eric Chou",
         "img":"/song_covers/unbreakable_love.jpg",
         "language":"Chinese",
-        "orig_script": "tw"
+        "orig_script": "tw",
+        "yt_url": ""
     },
     {
         "id": 2,
@@ -15,7 +16,8 @@
         "artist":"WeiBird",
         "img":"/song_covers/red_scarf.jpg",
         "language":"Chinese",
-        "orig_script":"tw"
+        "orig_script":"tw",
+        "yt_url": ""
     },
     {
         "id": 3,
@@ -24,7 +26,8 @@
         "artist":"Crowd Lu",
         "img":"/song_covers/sun_and_earth.jpg",
         "language":"Chinese",
-        "orig_script": "tw"
+        "orig_script": "tw",
+        "yt_url": ""
     },
     {
         "id": 4,
@@ -33,7 +36,8 @@
         "artist":"李荣浩",
         "img":"/song_covers/quit_smoking.png",
         "language":"Chinese",
-        "orig_script": "cn"
+        "orig_script": "cn",
+        "yt_url": "V7hJgBcRDwM"
     }
 
 ]
