@@ -9,7 +9,7 @@ import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import Youtube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
-import { searchYoutube } from '../../lib/youtubeSearch';
+import { fetchVideoId } from '../../lib/youtubeSearch';
 import './SongPage.css';
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
@@ -110,12 +110,15 @@ export default function SongPage() {
     // fetch youtube url to display video embed on initial render
     useEffect( () => {
         async function fetchURL() {
-            const videoId = await searchYoutube(`${song_info?.artist} ${song_info?.title}`)
-            setYtVideoId(videoId);
+            if (song_info){
+                const videoId = await fetchVideoId(song_info.artist, song_info.title)
+                setYtVideoId(videoId);
+            }
         }
 
         if (!song_info?.yt_url) {
-            fetchURL()
+            fetchURL();
+            // save newly fetched url to database for quicker retrieval next time
         }
         else{
             setYtVideoId(song_info.yt_url);
