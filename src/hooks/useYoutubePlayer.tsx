@@ -6,7 +6,6 @@ export default function useYouTubePlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const onReady = useCallback((event: YouTubeEvent) => {
-    console.log("YouTube ready");
     setPlayer(event.target);
   }, []);
 
