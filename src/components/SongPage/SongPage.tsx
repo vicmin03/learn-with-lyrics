@@ -8,8 +8,8 @@ import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import Youtube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
+import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import './SongPage.css';
-
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -102,6 +102,8 @@ export default function SongPage() {
     const toggleSimplified = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSimplifiedCharacters(event.target.checked);
     }
+
+    const youtube = useYouTubePlayer();
 
     // fetch lyrics from API on initial render
     useEffect(() => {
@@ -250,15 +252,7 @@ export default function SongPage() {
                         },
             
                     }}
-                    onReady={(event) => {
-                        console.log("YouTube ready");
-
-                        const player = event.target;
-
-                        console.log("Duration:", player.getDuration());
-
-                        setPlayer(player);
-                    }}
+                    onReady={youtube.onReady}
                 />
             </div>
 
