@@ -10,3 +10,4 @@
 - how does it handle english lyrics? e.g. 刻在我心底的名字
 - song cards grid doesn't take up enough horizontal space and titles get cut off - have max 3 across with enough space
 - issue of sync with audio if music video and not just official audio
+- what if controlling music player with keyboard? make sure fetching correct player state to update buttons

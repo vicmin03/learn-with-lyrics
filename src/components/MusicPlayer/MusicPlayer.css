@@ -1,0 +1,44 @@
+.music-player-bar {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    align-items: center;
+    padding: 1rem;
+    margin-top: 1rem;
+    background-color: var(--accent-bg);
+}
+
+.music-player-progress {
+    height: 1.5rem;
+    width: 90%;
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--bg);
+}
+
+/* Chrome, Edge, Safari */
+.music-player-progress::-webkit-progress-bar {
+    background-color: var(--bg);
+    border-radius: 10px;
+}
+
+.music-player-progress::-webkit-progress-value {
+    background-color: var(--accent);
+    border-radius: 10px;
+}
+
+.music-player-icon {
+    font-size: 30px;
+    color: var(--accent);
+}
+
+.music-player-play-button {
+    font-size: 40px;
+    color: var(--accent);
+}
+
+.youtube-player {
+  display: none;
+}

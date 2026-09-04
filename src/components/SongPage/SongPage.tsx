@@ -7,9 +7,9 @@ import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
-import Youtube from 'react-youtube';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import { fetchVideoId } from '../../lib/youtubeSearch';
+import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
 import './SongPage.css';
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
@@ -103,8 +103,6 @@ export default function SongPage() {
     const toggleSimplified = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSimplifiedCharacters(event.target.checked);
     }
-
-    const youtube = useYouTubePlayer();
 
     // fetch youtube url to display video embed on initial render
     useEffect( () => {
@@ -263,8 +261,9 @@ export default function SongPage() {
 
             </div>
 
-            <div className="song-page-player">
-                <Youtube videoId={ytVideoId || song_info.yt_url}
+            {/* <div className="song-page-player">
+                <Youtube className="youtube-player"
+                    videoId={ytVideoId || song_info.yt_url}
                     opts={{
                         width: '600',
                         height: '400',
@@ -276,6 +275,10 @@ export default function SongPage() {
                     }}
                     onReady={youtube.onReady}
                 />
+            </div> */}
+
+            <div>
+                <MusicPlayer artist={song_info.artist} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
             </div>
 
         </main>
