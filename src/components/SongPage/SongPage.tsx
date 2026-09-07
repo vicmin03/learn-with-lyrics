@@ -204,15 +204,16 @@ export default function SongPage() {
 
     return (
         <main>
-            <div className="song-page-header">
+            <header className="song-page-header" aria-labelledby="song-heading">
 
                 <div className="song-page-info">
-                    <h1 className="song-page-title" lang="zh">{song_info.title}</h1>
+                    <h1 id="song-heading" className="song-page-title" lang="zh">{song_info.title}</h1>
                     {song_info.eng_title && <p className="song-page-alt-title" lang="en">({song_info.eng_title})</p>}
                     <p className="song-page-artist">{song_info.artist}</p>
                 </div>
 
-                <div className="settings-bar">
+                <fieldset className="settings-bar">
+                    <legend className="visually-hidden">Lyrics settings</legend>
                     {hasTimestamps && <div className="icon-and-text">
                             <IoCheckmarkCircleOutline className="small-icon" aria-hidden="true"/>
                             <p>Has timed lyrics</p>
@@ -226,19 +227,20 @@ export default function SongPage() {
 
                     <span id="pronunciation-state">{showPronunciation ? 'On' : 'Off'}</span>
                     
-                    <span id="pronunciation-label">Script</span>
+                    <span id="script-label">Script</span>
                     <Switch 
                         aria-labelledby="script-label script-state"
                         checked = {simplifiedCharacters} 
                         onChange = {toggleSimplified} 
                     />
-                    <span id="pronunciation-state">{simplifiedCharacters ? 'Simplified' : 'Traditional'}</span>
-                </div>
-            </div>
+                    <span id="script-state">{simplifiedCharacters ? 'Simplified' : 'Traditional'}</span>
+                </fieldset>
+            </header>
 
 
 
-            <div className="song-page-main">
+            <section className="song-page-main" aria-labelledby="lyrics-heading">
+                <h2 id="lyrics-heading" className="visually-hidden">Lyrics</h2>
                 {isLoading ? (
                     <p role="status" aria-live="polite">Loading lyrics...</p>
                 ) : errorMessage ? (
@@ -259,7 +261,7 @@ export default function SongPage() {
                     />
                 )}
 
-            </div>
+            </section>
 
             <div>
                 <MusicPlayer artist={song_info.artist} img={song_info.img} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>

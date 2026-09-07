@@ -70,12 +70,12 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
     return (
         <>
-            <div className="music-player-bar" aria-busy={isLoading}>
+            <section className="music-player-bar" aria-busy={isLoading} aria-label="Music player">
                 <div className="music-player-cover-img">
                     {isLoading ? (
                         <div className="music-player-loading" role="status" aria-label="Loading music player" />
                     ) : (
-                        <img className="song-cover-img" src={props.img}/>
+                            <img className="song-cover-img" src={props.img} alt={`${props.title} cover`} />
                     )}
                 </div>
                 <div className="music-player-song-details"> 
@@ -99,9 +99,15 @@ export function MusicPlayer(props: MusicPlayerProps) {
                     onStateChange={youtube.onStateChange}
                 />
 
-                <div className="music-player-main">
-                    <progress className="music-player-progress" value={youtube.progress} max={100}/>
-                    <div className="music-player-buttons">
+                <div className="music-player-main" role="group" aria-label="Playback controls">
+                    <progress
+                        className="music-player-progress"
+                        value={youtube.progress}
+                        max={100}
+                        aria-label="Song progress"
+                        aria-valuetext={`${formatTime(youtube.currentTime)} of ${formatTime(youtube.totalDuration)}`}
+                    />
+                    <div className="music-player-buttons" role="group" aria-label="Song navigation and playback">
                         <IconButton disabled={isLoading} aria-label="Previous song">
                             <IoPlayBackCircle className="music-player-icon"/>
                         </IconButton> 
@@ -115,10 +121,16 @@ export function MusicPlayer(props: MusicPlayerProps) {
                             <IoPlayForwardCircle className="music-player-icon"/>
                         </IconButton> 
                     </div>
-                    <p className="timestamp">{formatTime(youtube.currentTime)}/{formatTime(youtube.totalDuration)}</p>
+                    <p
+                        className="timestamp"
+                        role="timer"
+                        aria-label={`Current time ${formatTime(youtube.currentTime)} of ${formatTime(youtube.totalDuration)}`}
+                    >
+                        {formatTime(youtube.currentTime)}/{formatTime(youtube.totalDuration)}
+                    </p>
 
                 </div>
-                <div className="volume-control">
+                <div className="volume-control" role="group" aria-label="Volume controls">
                     <IconButton
                         disabled={isLoading}
                         aria-label={youtube.isMute ? "Unmute" : "Mute"}
@@ -139,7 +151,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
                 </div>
                
-            </div>
+            </section>
         </>
     )
 }

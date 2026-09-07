@@ -120,7 +120,6 @@
 }
 
 .volume-control .volume-slider {
-    display: none !important;
     position: absolute;
     right: 50%;
     bottom: 100%;
@@ -132,11 +131,14 @@
     box-sizing: border-box;
     transform: translateX(50%);
     z-index: 2;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .volume-control:hover .volume-slider,
 .volume-control:focus-within .volume-slider {
-    display: flex !important;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .volume-slider .MuiSlider-rail {
