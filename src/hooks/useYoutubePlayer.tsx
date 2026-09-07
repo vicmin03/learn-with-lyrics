@@ -51,6 +51,14 @@ export default function useYouTubePlayer() {
     setPlayer(event.target);
   }, []);
 
+  const onStateChange = useCallback((event: YouTubeEvent<number>) => {
+    if (event.data === 1) {
+      setIsPlaying(true);
+    } else if (event.data === 0 || event.data === 2) {
+      setIsPlaying(false);
+    }
+  }, []);
+
   const play = useCallback(() => {
     player?.playVideo();
     setIsPlaying(true);
@@ -91,6 +99,7 @@ export default function useYouTubePlayer() {
     totalDuration,
     progress,
     onReady,
+    onStateChange,
     play,
     pause,
     seek,
@@ -101,26 +110,3 @@ export default function useYouTubePlayer() {
     ready: player !== null,
   };
 }
-
-
-// how to use
-
-// const youtube = useYouTubePlayer();
-
-// return (
-//   <>
-//     <YouTube
-//       videoId={videoId}
-//       opts={opts}
-//       onReady={youtube.onReady}
-//     />
-
-//     <button onClick={youtube.play}>
-//       Play
-//     </button>
-
-//     <button onClick={youtube.pause}>
-//       Pause
-//     </button>
-//   </>
-// );

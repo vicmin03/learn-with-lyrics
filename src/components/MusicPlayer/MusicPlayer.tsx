@@ -85,6 +85,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
             
                     }}
                     onReady={youtube.onReady}
+                    onStateChange={youtube.onStateChange}
                 />
 
                 <div className="music-player-main">

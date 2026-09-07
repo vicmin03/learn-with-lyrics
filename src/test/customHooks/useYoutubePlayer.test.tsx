@@ -18,6 +18,7 @@ describe("useYouTubePlayer", () => {
       playVideo: vi.fn(),
       pauseVideo: vi.fn(),
       seekTo: vi.fn(),
+      getDuration: vi.fn().mockResolvedValue(1),
     };
 
     act(() => {
@@ -36,6 +37,7 @@ describe("useYouTubePlayer", () => {
       playVideo: vi.fn(),
       pauseVideo: vi.fn(),
       seekTo: vi.fn(),
+      getDuration: vi.fn().mockResolvedValue(1),
     };
 
     act(() => {
@@ -58,6 +60,7 @@ describe("useYouTubePlayer", () => {
       playVideo: vi.fn(),
       pauseVideo: vi.fn(),
       seekTo: vi.fn(),
+      getDuration: vi.fn().mockResolvedValue(1),
     };
 
     act(() => {
@@ -81,13 +84,30 @@ describe("useYouTubePlayer", () => {
     expect(result.current.isPlaying).toBe(false);
   });
 
+  test("updates isPlaying when YouTube reports an external state change", () => {
+    const { result } = renderHook(() => useYouTubePlayer());
+
+    act(() => {
+      result.current.onStateChange({ data: 1 } as YouTubeEvent<number>);
+    });
+
+    expect(result.current.isPlaying).toBe(true);
+
+    act(() => {
+      result.current.onStateChange({ data: 2 } as YouTubeEvent<number>);
+    });
+
+    expect(result.current.isPlaying).toBe(false);
+  });
+
   test("pauses the video", () => {
     const { result } = renderHook(() => useYouTubePlayer());
 
     const player = {
       playVideo: vi.fn(),
       pauseVideo: vi.fn(),
-      seekTo: vi.fn()
+      seekTo: vi.fn(),
+      getDuration: vi.fn().mockResolvedValue(1),
     };
 
     act(() => {
@@ -110,6 +130,7 @@ describe("useYouTubePlayer", () => {
       playVideo: vi.fn(),
       pauseVideo: vi.fn(),
       seekTo: vi.fn(),
+      getDuration: vi.fn().mockResolvedValue(1),
     };
 
     act(() => {
