@@ -206,6 +206,7 @@ export default function SongPage() {
     return (
         <main>
             <div className="song-page-header">
+
                 <div className="song-page-info">
                     <h1 className="song-page-title" lang="zh">{song_info.title}</h1>
                     {song_info.eng_title && <p className="song-page-alt-title" lang="en">({song_info.eng_title})</p>}
@@ -261,24 +262,8 @@ export default function SongPage() {
 
             </div>
 
-            {/* <div className="song-page-player">
-                <Youtube className="youtube-player"
-                    videoId={ytVideoId || song_info.yt_url}
-                    opts={{
-                        width: '600',
-                        height: '400',
-                        playerVars: {
-                            autoplay: 0,
-                            origin: window.location.origin
-                        },
-            
-                    }}
-                    onReady={youtube.onReady}
-                />
-            </div> */}
-
             <div>
-                <MusicPlayer artist={song_info.artist} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
+                <MusicPlayer artist={song_info.artist} img={song_info.img} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
             </div>
 
         </main>

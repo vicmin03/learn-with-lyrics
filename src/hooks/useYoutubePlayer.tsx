@@ -6,6 +6,7 @@ export default function useYouTubePlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [isMute, setIsMute] = useState(false);
 
   const progress = totalDuration > 0
     ? (currentTime / totalDuration) * 100
@@ -69,6 +70,16 @@ export default function useYouTubePlayer() {
     [player]
   );
 
+  const mute = useCallback(() => {
+    player?.mute();
+    setIsMute(true);
+  }, [player])
+
+  const unmute = useCallback(() => {
+    player?.unMute();
+    setIsMute(false);
+  }, [player])
+
   return {
     player,
     isPlaying,
@@ -79,6 +90,9 @@ export default function useYouTubePlayer() {
     play,
     pause,
     seek,
+    mute,
+    unmute,
+    isMute,
     ready: player !== null,
   };
 }

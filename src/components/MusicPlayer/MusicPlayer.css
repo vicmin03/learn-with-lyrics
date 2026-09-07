@@ -1,6 +1,6 @@
 .music-player-bar {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     position: sticky;
     align-items: center;
     padding: 1rem;
@@ -8,9 +8,31 @@
     background-color: var(--accent-bg);
 }
 
+.music-player-cover-img {
+    padding-right: 1rem;
+}
+
+.song-cover-img {
+    width: 5rem;
+    border-radius: 1rem;
+}
+
+.music-player-song-details {
+    justify-items: left;
+    align-items: start;
+}
+
+.music-player-main{
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    padding: 0rem 1rem;
+}
+
 .music-player-progress {
-    height: 1.5rem;
-    width: 90%;
+    display: block;
+    height: 1rem;
+    width: 100%;
     appearance: none;
     border: none;
     border-radius: 10px;
@@ -40,5 +62,33 @@
 }
 
 .youtube-player {
-  display: none;
+    display: none;
+}
+
+.music-player-controls {
+    position: relative;
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.timestamp {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin: 0;
+    transform: translateY(-50%);
+    padding-right: 1rem;
+}
+
+.music-player-buttons {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.volume-control {
+    align-self: flex-start;
 }
