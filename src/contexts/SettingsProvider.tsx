@@ -7,7 +7,7 @@ interface SettingsProviderProps {
 
 export function SettingsProvider({ children }: SettingsProviderProps) {
     // control default settings of simplified/traditional text and pinyin toggles in context
-    const [showPronunciation, setShowPronunciation] = useState(false);
+    const [showPronunciation, setShowPronunciation] = useState(true);
     const [simplifiedCharacters, setSimplifiedCharacters] = useState(true);
 
     return (
