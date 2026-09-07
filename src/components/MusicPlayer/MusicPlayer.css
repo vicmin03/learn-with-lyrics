@@ -24,6 +24,22 @@
     border-radius: 1rem;
 }
 
+.music-player-loading {
+    width: 3rem;
+    height: 3rem;
+    box-sizing: border-box;
+    border: 10px solid var(--bg);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: music-player-spin 0.9s linear infinite;
+}
+
+@keyframes music-player-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .music-player-song-details {
     justify-items: left;
     align-items: start;

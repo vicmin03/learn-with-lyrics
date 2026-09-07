@@ -24,6 +24,7 @@ interface MusicPlayerProps {
 export function MusicPlayer(props: MusicPlayerProps) {
     const youtube = useYouTubePlayer();
     const [volume, setVolume] = useState(100);
+    const isLoading = !youtube.ready;
 
     useEffect(() => {
         youtube.getVolume().then(setVolume);
@@ -31,6 +32,8 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
     // what happens when user clicks on pause/play button
     const handlePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (isLoading) return;
+
         if (youtube.isPlaying) {
             youtube.pause()
         }
@@ -41,6 +44,8 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
     // clicking volume button toggles mute
     const toggleMute = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (isLoading) return;
+
         if (youtube.isMute) {
             youtube.unmute()
         }
@@ -51,6 +56,8 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
     // control changing volume with slider
     const handleVolume = (e: Event, newValue: number) => {
+        if (isLoading) return;
+
         const volume = Array.isArray(newValue) ? newValue[0] : newValue;
         setVolume(volume)
         if (volume === 0) {
@@ -63,9 +70,13 @@ export function MusicPlayer(props: MusicPlayerProps) {
 
     return (
         <>
-            <div className="music-player-bar">
+            <div className="music-player-bar" aria-busy={isLoading}>
                 <div className="music-player-cover-img">
-                    <img className="song-cover-img" src={props.img}/>
+                    {isLoading ? (
+                        <div className="music-player-loading" role="status" aria-label="Loading music player" />
+                    ) : (
+                        <img className="song-cover-img" src={props.img}/>
+                    )}
                 </div>
                 <div className="music-player-song-details"> 
                     <h2>{props.title}</h2>
@@ -91,14 +102,16 @@ export function MusicPlayer(props: MusicPlayerProps) {
                 <div className="music-player-main">
                     <progress className="music-player-progress" value={youtube.progress} max={100}/>
                     <div className="music-player-buttons">
-                        <IconButton >
+                        <IconButton disabled={isLoading} aria-label="Previous song">
                             <IoPlayBackCircle className="music-player-icon"/>
                         </IconButton> 
                         <IconButton 
+                            disabled={isLoading}
+                            aria-label={youtube.isPlaying ? "Pause" : "Play"}
                             onClick={handlePlay}>
                             {youtube.isPlaying ? <IoPauseCircle className="music-player-play-button"/> : <IoPlayCircle className="music-player-play-button"/>}
                         </IconButton> 
-                        <IconButton >
+                        <IconButton disabled={isLoading} aria-label="Next song">
                             <IoPlayForwardCircle className="music-player-icon"/>
                         </IconButton> 
                     </div>
@@ -107,6 +120,8 @@ export function MusicPlayer(props: MusicPlayerProps) {
                 </div>
                 <div className="volume-control">
                     <IconButton
+                        disabled={isLoading}
+                        aria-label={youtube.isMute ? "Unmute" : "Mute"}
                         onClick={toggleMute}>
                         {youtube.isMute ? <IoVolumeMute className="music-player-icon"/> : <IoVolumeHigh className="music-player-icon"/>}
                     </IconButton>
@@ -118,6 +133,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
                         value={youtube.isMute ? 0 : volume}
                         orientation="vertical"
                         track="normal"
+                        disabled={isLoading}
                         onChange={handleVolume}
                     />
 
