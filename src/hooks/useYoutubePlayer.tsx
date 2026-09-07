@@ -31,7 +31,6 @@ export default function useYouTubePlayer() {
     };
 
     getTotalDuration();
-    console.log("TOTAL TIME: ", totalDuration)
     
     return () => clearTimeout(timeout);
   }, [player])
@@ -45,7 +44,6 @@ export default function useYouTubePlayer() {
       setCurrentTime(time);
     }, 250)
 
-    console.log("PROGRESS IS", progress)
     return () => clearInterval(interval);
   }, [player, isPlaying])
 
@@ -80,6 +78,12 @@ export default function useYouTubePlayer() {
     setIsMute(false);
   }, [player])
 
+  const getVolume = useCallback(async () => {
+    if (!player) return 100;
+    const volume = await player.getVolume();
+    return volume;
+  }, [player]);
+
   return {
     player,
     isPlaying,
@@ -93,6 +97,7 @@ export default function useYouTubePlayer() {
     mute,
     unmute,
     isMute,
+    getVolume,
     ready: player !== null,
   };
 }

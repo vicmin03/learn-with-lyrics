@@ -1,5 +1,6 @@
 import "./MusicPlayer.css"
-import { IconButton } from "@mui/material";
+import { useEffect, useState } from "react";
+import { IconButton, Slider } from "@mui/material";
 import Youtube from 'react-youtube';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import { IoPlayCircle, IoPauseCircle, IoPlayBackCircle, IoPlayForwardCircle, IoPause, IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
@@ -22,6 +23,11 @@ interface MusicPlayerProps {
 
 export function MusicPlayer(props: MusicPlayerProps) {
     const youtube = useYouTubePlayer();
+    const [volume, setVolume] = useState(100);
+
+    useEffect(() => {
+        youtube.getVolume().then(setVolume);
+    }, [youtube]);
 
     // what happens when user clicks on pause/play button
     const handlePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -40,6 +46,18 @@ export function MusicPlayer(props: MusicPlayerProps) {
         }
         else {
             youtube.mute()
+        }
+    }
+
+    // control changing volume with slider
+    const handleVolume = (e: Event, newValue: number) => {
+        const volume = Array.isArray(newValue) ? newValue[0] : newValue;
+        setVolume(volume)
+        if (volume === 0) {
+            youtube.mute();
+        } else {
+            youtube.unmute();
+            youtube.player?.setVolume(volume);
         }
     }
 
@@ -91,8 +109,19 @@ export function MusicPlayer(props: MusicPlayerProps) {
                         onClick={toggleMute}>
                         {youtube.isMute ? <IoVolumeMute className="music-player-icon"/> : <IoVolumeHigh className="music-player-icon"/>}
                     </IconButton>
-                </div>
+                    <Slider 
+                        className="volume-slider"
+                        aria-label="volume"
+                        min={0}
+                        max={100}
+                        value={youtube.isMute ? 0 : volume}
+                        orientation="vertical"
+                        track="normal"
+                        onChange={handleVolume}
+                    />
 
+                </div>
+               
             </div>
         </>
     )
