@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { IconButton, Slider } from "@mui/material";
 import Youtube from 'react-youtube';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
-import { IoPlayCircle, IoPauseCircle, IoPlayBackCircle, IoPlayForwardCircle, IoPause, IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
+import { IoPlayCircle, IoPauseCircle, IoPlayBackCircle, IoPlayForwardCircle, IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
 
 
 // function to convert seconds to MM:SS format
@@ -31,7 +31,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
     }, [youtube]);
 
     // what happens when user clicks on pause/play button
-    const handlePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handlePlay = () => {
         if (isLoading) return;
 
         if (youtube.isPlaying) {
@@ -43,7 +43,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
     }
 
     // clicking volume button toggles mute
-    const toggleMute = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const toggleMute = () => {
         if (isLoading) return;
 
         if (youtube.isMute) {

@@ -7,7 +7,6 @@ import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
-import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import { fetchVideoId } from '../../lib/youtubeSearch';
 import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
 import './SongPage.css';

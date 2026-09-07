@@ -1,6 +1,6 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
     mockedLyricsResponse,
@@ -29,6 +29,10 @@ vi.mock('../lib/chineseTokenizer', () => ({
 
 vi.mock('../lib/youtubeSearch', () => ({
     fetchVideoId: vi.fn().mockResolvedValue('test-video-id'),
+}));
+
+vi.mock('../components/MusicPlayer/MusicPlayer', () => ({
+    MusicPlayer: () => <div data-testid="music-player" />,
 }));
 
 const { default: SongPage } = await import('../components/SongPage/SongPage');
@@ -159,11 +163,17 @@ describe('Song Page', () => {
         // find the switch and toggle it (MUI renders a switch role)
         const toggle = screen.getAllByRole('switch')[0];
 
+        expect(toggle).toBeChecked();
+        expect(await screen.findByText('py(Hello)')).toBeInTheDocument();
+
+        await userEvent.click(toggle);
         expect(toggle).not.toBeChecked();
+        await waitFor(() => {
+            expect(screen.queryByText('py(Hello)')).not.toBeInTheDocument();
+        });
+
         await userEvent.click(toggle);
         expect(toggle).toBeChecked();
-
-        // pronunciation text should appear (from mocked pinyin-pro)
         expect(await screen.findByText('py(Hello)')).toBeInTheDocument();
     });
 
