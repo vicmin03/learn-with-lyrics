@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MusicPlayer } from '../components/MusicPlayer/MusicPlayer';
+import type { YouTubePlayer } from 'react-youtube';
 
 const youtubePlayer = {
     playVideo: vi.fn(),
@@ -27,6 +28,44 @@ function MockYouTube({ onReady }: { onReady: (event: { target: typeof youtubePla
     return <div data-testid="youtube-player" />;
 }
 
+function TestPlayer() {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMute, setIsMute] = useState(false);
+    const [ready] = useState(autoReady);
+
+    const player = useMemo(() => ({
+        player: ready ? youtubePlayer as unknown as YouTubePlayer : null,
+        isPlaying,
+        currentTime: 0,
+        totalDuration: 180,
+        progress: 0,
+        onReady: vi.fn(),
+        onStateChange: vi.fn(),
+        play: () => {
+            youtubePlayer.playVideo();
+            setIsPlaying(true);
+        },
+        pause: () => {
+            youtubePlayer.pauseVideo();
+            setIsPlaying(false);
+        },
+        seek: vi.fn(),
+        mute: () => {
+            youtubePlayer.mute();
+            setIsMute(true);
+        },
+        unmute: () => {
+            youtubePlayer.unMute();
+            setIsMute(false);
+        },
+        isMute,
+        getVolume: () => youtubePlayer.getVolume(),
+        ready,
+    }), [isMute, isPlaying, ready]);
+
+    return <MusicPlayer player={player} img="cover.jpg" artist="Example artist" title="Example song" ytVideoId="video-id" />;
+}
+
 vi.mock('react-youtube', () => ({
     default: MockYouTube,
 }));
@@ -40,14 +79,7 @@ describe('Music Player', () => {
         youtubePlayer.getCurrentTime.mockResolvedValue(65);
     });
 
-    const renderPlayer = () => render(
-        <MusicPlayer
-            img="cover.jpg"
-            artist="Example artist"
-            title="Example song"
-            ytVideoId="video-id"
-        />
-    );
+    const renderPlayer = () => render(<TestPlayer />);
 
     test('Music player component loads all elements correctly', async () => {
         renderPlayer();

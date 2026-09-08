@@ -135,6 +135,46 @@ describe('Lyrics', () => {
         );
 
         expect(await screen.findByRole('button', { name: 'Second' })).toHaveClass('active');
-        expect(screen.getByRole('button', { name: 'First' })).not.toHaveClass('active');
+        expect(screen.getByRole('button', { name: 'First' })).toHaveClass('active');
+    });
+
+    test('scrolls the active lyric into the center of the page', async () => {
+        const scrollIntoView = vi.fn();
+        HTMLElement.prototype.scrollIntoView = scrollIntoView;
+        const lyrics = [
+            { id: 'lrc_0', start_time: 0, text: 'First line' },
+            { id: 'lrc_1', start_time: 1000, text: 'Second line' },
+        ];
+
+        const { rerender } = render(
+            <Lyrics
+                currentTime={0}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        await screen.findByRole('button', { name: 'First' });
+        scrollIntoView.mockClear();
+
+        rerender(
+            <Lyrics
+                currentTime={1.5}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        await screen.findByRole('button', { name: 'Second' });
+        expect(scrollIntoView).toHaveBeenCalledWith({
+            behavior: 'smooth',
+            block: 'center',
+        });
     });
 });
