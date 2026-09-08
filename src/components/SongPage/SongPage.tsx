@@ -182,12 +182,11 @@ export default function SongPage() {
 
     // find which line is currently being played
     const activeIndex = findActiveLyricIndex(songLyrics, youtube.currentTime);
-    console.log("ACTIVE INDEX IS", activeIndex);
 
     // seek to previous lyric with music player OR beginning of current line if part-way through
     function handlePreviousLyric() {
         const currentIndex = activeIndex;
-        const currentLyricTime = songLyrics[currentIndex]?.start_time ?? 0;
+        const currentLyricTime = msToSeconds(songLyrics[currentIndex]?.start_time ?? 0);
         const isNearStart = youtube.currentTime - currentLyricTime < 2;
         const targetIndex = isNearStart
             ? Math.max(0, currentIndex - 1)

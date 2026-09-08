@@ -43,7 +43,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
-                currentTime={0}
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -66,7 +66,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
-                currentTime={0}
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -84,7 +84,7 @@ describe('Lyrics', () => {
     test('renders nothing when no lyrics provided', () => {
         render(
             <Lyrics
-                currentTime={0}
+                activeIndex={-1}
                 lyrics={[]}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -102,7 +102,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
-                currentTime={0}
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={true}
                 simplifiedCharacters={true}
@@ -125,7 +125,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
-                currentTime={1.5}
+                activeIndex={1}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -148,7 +148,7 @@ describe('Lyrics', () => {
 
         const { rerender } = render(
             <Lyrics
-                currentTime={0}
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -162,7 +162,7 @@ describe('Lyrics', () => {
 
         rerender(
             <Lyrics
-                currentTime={1.5}
+                activeIndex={1}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}

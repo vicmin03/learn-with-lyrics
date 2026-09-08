@@ -8,6 +8,7 @@ import type { YouTubePlayer } from 'react-youtube';
 const youtubePlayer = {
     playVideo: vi.fn(),
     pauseVideo: vi.fn(),
+    seekTo: vi.fn(),
     mute: vi.fn(),
     unMute: vi.fn(),
     setVolume: vi.fn(),
@@ -17,6 +18,8 @@ const youtubePlayer = {
 };
 
 let autoReady = true;
+const onPreviousLyric = vi.fn();
+const onNextLyric = vi.fn();
 
 function MockYouTube({ onReady }: { onReady: (event: { target: typeof youtubePlayer }) => void }) {
     useEffect(() => {
@@ -63,7 +66,17 @@ function TestPlayer() {
         ready,
     }), [isMute, isPlaying, ready]);
 
-    return <MusicPlayer player={player} img="cover.jpg" artist="Example artist" title="Example song" ytVideoId="video-id" />;
+    return (
+        <MusicPlayer
+            player={player}
+            img="cover.jpg"
+            artist="Example artist"
+            title="Example song"
+            ytVideoId="video-id"
+            onPreviousLyric={onPreviousLyric}
+            onNextLyric={onNextLyric}
+        />
+    );
 }
 
 vi.mock('react-youtube', () => ({
@@ -108,6 +121,17 @@ describe('Music Player', () => {
         await user.click(screen.getByRole('button', { name: 'Pause' }));
         expect(youtubePlayer.pauseVideo).toHaveBeenCalledOnce();
         expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    });
+
+    test('previous and next lyric buttons call their seek callbacks', async () => {
+        const user = userEvent.setup();
+        renderPlayer();
+
+        await user.click(await screen.findByRole('button', { name: 'Previous song' }));
+        await user.click(screen.getByRole('button', { name: 'Next song' }));
+
+        expect(onPreviousLyric).toHaveBeenCalledOnce();
+        expect(onNextLyric).toHaveBeenCalledOnce();
     });
 
     test('volume control contains the volume slider', async () => {
