@@ -5,13 +5,17 @@
   line-height: 1.3;
 }
 
-.lyrics-token {
+/* .lyrics-token {
   color: inherit;
   font: inherit;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.lyrics-token.active {
+  color: brown;
 }
 
 .lyrics-token:hover {
@@ -22,7 +26,7 @@
   outline: 3px solid darkblue;
   outline-offset: 3px;
   border-radius: 2px;
-}
+} */
 
 .song-page-header {
   display: flex;

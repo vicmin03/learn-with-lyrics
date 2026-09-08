@@ -38,6 +38,16 @@
         "language":"Chinese",
         "orig_script": "cn",
         "yt_url": "4odeawiRtTk"
+    },
+    {
+        "id": 5,
+        "title": "才二十三",
+        "eng_title": "Twenty Three",
+        "artist": "Khalil Fong",
+        "img": "/song_covers/twenty_three.jpg",
+        "language":"Chinese",
+        "orig_script":"tw",
+        "yt_url": "y2N7Imnmwhk"
     }
 
 ]

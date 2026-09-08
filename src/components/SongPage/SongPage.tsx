@@ -2,14 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
 import song_list from '../../song_list.json';
-import { Lyrics } from '../Lyrics';
+import { Lyrics } from '../Lyrics/Lyrics';
 import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
 import { useSettings } from '../../contexts/useSettings';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { fetchVideoId } from '../../lib/youtubeSearch';
 import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
+import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import './SongPage.css';
+
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
@@ -17,7 +19,7 @@ const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 function formatName(name: string): string {
     return name.split(' ').join('%20');
 }
-// convert timestamp string to milliseconds
+// convert timestamp string to milliseconds (used if timed_lyrics doesn't already exist)
 function timestampToMs(timestamp: string): number {
     const [minutes, seconds] = timestamp.split(':');
     const [wholeSeconds, milliseconds] = seconds.split('.');
@@ -88,6 +90,9 @@ export default function SongPage() {
         setSimplifiedCharacters,
     } = useSettings();
 
+    const youtube = useYouTubePlayer();
+
+    // to close vocab pop up box
     const closeVocabInfo = useCallback(() => {
         setVocabWord("");
         lookupTriggerRef.current?.focus();
@@ -120,7 +125,7 @@ export default function SongPage() {
 
         if (!song_info?.yt_url) {
             fetchURL();
-            // save newly fetched url to database for quicker retrieval next time
+            // TODO: save newly fetched url to database for quicker retrieval next time
         }
     }, [song_info])
 
@@ -237,8 +242,6 @@ export default function SongPage() {
                 </fieldset>
             </header>
 
-
-
             <section className="song-page-main" aria-labelledby="lyrics-heading">
                 <h2 id="lyrics-heading" className="visually-hidden">Lyrics</h2>
                 {isLoading ? (
@@ -249,7 +252,7 @@ export default function SongPage() {
                     <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
                 ) : (
                     <>
-                        <Lyrics lyrics={songLyrics} showPronunciation={showPronunciation} simplifiedCharacters={simplifiedCharacters} origScript={song_info.orig_script} onLookup={handleLookup} />
+                        <Lyrics currentTime={youtube.currentTime} lyrics={songLyrics} showPronunciation={showPronunciation} simplifiedCharacters={simplifiedCharacters} origScript={song_info.orig_script} onLookup={handleLookup} />
                     </>
                 )}
 
@@ -264,7 +267,7 @@ export default function SongPage() {
             </section>
 
             <div>
-                <MusicPlayer artist={song_info.artist} img={song_info.img} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
+                <MusicPlayer player={youtube} artist={song_info.artist} img={song_info.img} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
             </div>
 
         </main>

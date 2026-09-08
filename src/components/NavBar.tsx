@@ -19,7 +19,7 @@ export default function Navbar() {
             </Link>
             
             
-            <div className="language-select">
+            {/* <div className="language-select">
                 <FormControl variant="standard">
                     <Select className="select"
                         id="language-select"
@@ -36,7 +36,7 @@ export default function Navbar() {
                     </Select>
                 </FormControl>
                 
-            </div>
+            </div> */}
             
 
             <IoSearch className="large-icons"

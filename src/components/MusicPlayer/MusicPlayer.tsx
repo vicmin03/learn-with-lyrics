@@ -15,6 +15,7 @@ function formatTime(seconds: number): string {
 
 
 interface MusicPlayerProps {
+    player: ReturnType<typeof useYouTubePlayer>,
     img: string,
     artist: string,
     title: string,
@@ -22,7 +23,8 @@ interface MusicPlayerProps {
 }
 
 export function MusicPlayer(props: MusicPlayerProps) {
-    const youtube = useYouTubePlayer();
+    // const youtube = useYouTubePlayer();
+    const youtube = props.player
     const [volume, setVolume] = useState(100);
     const isLoading = !youtube.ready;
 

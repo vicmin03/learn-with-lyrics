@@ -1,6 +1,6 @@
 import './VocabInfo.css';
 import '../../App.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton, Button, Link } from '@mui/material';
 import { IoClose } from "react-icons/io5";
 import { IoIosLink } from "react-icons/io";
@@ -47,8 +47,6 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
         }
 
         if (info != null && info.length > 0) {
-            console.log(info);
-
             // Get the definitions from the first dictionary entry
             return info[0].english;
         } else {
@@ -57,7 +55,7 @@ export default function VocabInfo ({vocab, onClose}: VocabInfoProps) {
 
     }
 
-    const definition = lookupWord(vocab);
+    const definition = useMemo(() => lookupWord(vocab), [vocab]);
 
     // close the vocab info box
     const closeInfo = () => {

@@ -23,7 +23,7 @@ vi.mock('pinyin-pro', () => ({
     pinyin: (s: string) => `py(${s})`,
 }));
 
-const { Lyrics } = await import('../components/Lyrics');
+const { Lyrics } = await import('../components/Lyrics/Lyrics');
 
 describe('Lyrics', () => {
     beforeEach(() => {
@@ -43,6 +43,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                currentTime={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -65,6 +66,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                currentTime={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -82,6 +84,7 @@ describe('Lyrics', () => {
     test('renders nothing when no lyrics provided', () => {
         render(
             <Lyrics
+                currentTime={0}
                 lyrics={[]}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -99,6 +102,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                currentTime={0}
                 lyrics={lyrics}
                 showPronunciation={true}
                 simplifiedCharacters={true}
@@ -111,5 +115,26 @@ describe('Lyrics', () => {
         expect(await screen.findByText('你好')).toBeInTheDocument();
         // pronunciation text should be present (from mocked pinyin-pro)
         expect(screen.getAllByText(/py\(/).length).toBeGreaterThan(0);
+    });
+
+    test('highlights the latest lyric that has started', async () => {
+        const lyrics = [
+            { id: 'lrc_0', start_time: 0, text: 'First line' },
+            { id: 'lrc_1', start_time: 1000, text: 'Second line' },
+        ];
+
+        render(
+            <Lyrics
+                currentTime={1.5}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        expect(await screen.findByRole('button', { name: 'Second' })).toHaveClass('active');
+        expect(screen.getByRole('button', { name: 'First' })).not.toHaveClass('active');
     });
 });
