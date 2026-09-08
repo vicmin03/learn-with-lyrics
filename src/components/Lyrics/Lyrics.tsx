@@ -11,7 +11,7 @@ export interface TokenizedLyric extends LyricsDict{
 }
 
 interface LyricsProps {
-    currentTime: number,
+    activeIndex: number,
     lyrics: LyricsDict[],
     showPronunciation: boolean,
     simplifiedCharacters: boolean,
@@ -23,33 +23,33 @@ function isWhitespace(token: ScriptToken) {
     return /^\s+$/.test(token.simplified);
 }
 
-// convert milliseconds to seconds for easier comparison with currentTime
-function msToSeconds(timestamp: number) {
-    return timestamp / 1000;
-}
+// // convert milliseconds to seconds for easier comparison with currentTime
+// function msToSeconds(timestamp: number) {
+//     return timestamp / 1000;
+// }
 
-function findActiveLyricIndex(lyrics: LyricsDict[], currentTime: number) {
-    let low = 0;
-    let high = lyrics.length - 1;
-    let activeIndex = -1;
+// function findActiveLyricIndex(lyrics: LyricsDict[], currentTime: number) {
+//     let low = 0;
+//     let high = lyrics.length - 1;
+//     let activeIndex = -1;
 
-    while (low <= high) {
-        const middle = Math.floor((low + high) / 2);
-        const lyricStart = msToSeconds(lyrics[middle].start_time);
+//     while (low <= high) {
+//         const middle = Math.floor((low + high) / 2);
+//         const lyricStart = msToSeconds(lyrics[middle].start_time);
 
-        if (lyricStart <= currentTime) {
-            activeIndex = middle;
-            low = middle + 1;
-        } else {
-            high = middle - 1;
-        }
-    }
+//         if (lyricStart <= currentTime) {
+//             activeIndex = middle;
+//             low = middle + 1;
+//         } else {
+//             high = middle - 1;
+//         }
+//     }
 
-    return activeIndex;
-}
+//     return activeIndex;
+// }
 
 
-export function Lyrics({ currentTime, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
+export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
 
     const refContainer = useRef<HTMLParagraphElement | null>(null);
@@ -59,8 +59,8 @@ export function Lyrics({ currentTime, lyrics, showPronunciation, simplifiedChara
         onLookup(word, trigger);
     }
 
-    // find the single active line of lyric by checking each lyric until start_time exceeds current
-    const activeIndex = findActiveLyricIndex(lyrics, currentTime);
+    // // find which line is currently being played
+    // const activeIndex = findActiveLyricIndex(lyrics, currentTime);
 
     // set up lyrics for toggling pronunciation and script
     // convert between simplified and traditional and prepare pinyin into token for quick conversion

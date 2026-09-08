@@ -71,7 +71,10 @@ export default function useYouTubePlayer() {
 
   const seek = useCallback(
     (seconds: number) => {
-      player?.seekTo(seconds, true);
+      if (!player) return;
+      
+      player.seekTo(seconds, true);
+      setCurrentTime(seconds);
     },
     [player]
   );

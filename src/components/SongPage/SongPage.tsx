@@ -10,58 +10,11 @@ import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { fetchVideoId } from '../../lib/youtubeSearch';
 import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
+import { msToSeconds, splitLyrics, formatName } from '../../lib/helperFunctions'
 import './SongPage.css';
 
 
 const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
-
-// add %20 between spaces in song title/artist for API calls.
-function formatName(name: string): string {
-    return name.split(' ').join('%20');
-}
-// convert timestamp string to milliseconds (used if timed_lyrics doesn't already exist)
-function timestampToMs(timestamp: string): number {
-    const [minutes, seconds] = timestamp.split(':');
-    const [wholeSeconds, milliseconds] = seconds.split('.');
-
-    return (
-        Number(minutes) * 60_000 +
-        Number(wholeSeconds) * 1_000 +
-        Number(milliseconds) * 10
-    );
-}
-
-// split line into timestamp and lyrics dictionary
-function splitLine(line: string, index: number): LyricsDict {
-    // check for timestamp at beginning of line
-    const match = line.match(/^\[(\d{2}:\d{2}\.\d{2})\]\s*(.*)$/);
-
-    if (!match) {
-        return {
-            id: `lrc_${index}`,
-            start_time: 0,
-            text: line
-        };
-    }
-
-    const [, timestamp, lyric] = match;
-    return {"id":`lrc_${index}`, 
-            "start_time": timestampToMs(timestamp), 
-            "text": lyric};
-}
-
-// split lyrics into lines 
-function splitLyrics(lyrics: string, hasTimestamps: boolean): LyricsDict[] {
-    const lines = lyrics.split('\n');
-    if (hasTimestamps) {
-        return lines.map(splitLine);   
-    }
-    return lines.map((lyric, index) => ({
-        id: `lrc_${index}`,
-        start_time: 0,
-        text: lyric
-    }));
-}
 
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
@@ -207,6 +160,48 @@ export default function SongPage() {
         setVocabWord(word);
     };
 
+    // calculate which line of song is currently being player in song
+    function findActiveLyricIndex(lyrics: LyricsDict[], currentTime: number) {
+        let low = 0;
+        let high = lyrics.length - 1;
+        let activeIndex = -1;
+
+        while (low <= high) {
+            const middle = Math.floor((low + high) / 2);
+            const lyricStart = msToSeconds(lyrics[middle].start_time);
+
+            if (lyricStart <= currentTime) {
+                activeIndex = middle;
+                low = middle + 1;
+            } else {
+                high = middle - 1;
+            }
+        }
+        return activeIndex;
+    }
+
+    // find which line is currently being played
+    const activeIndex = findActiveLyricIndex(songLyrics, youtube.currentTime);
+    console.log("ACTIVE INDEX IS", activeIndex);
+
+    // seek to previous lyric with music player OR beginning of current line if part-way through
+    function handlePreviousLyric() {
+        const currentIndex = activeIndex;
+        const currentLyricTime = songLyrics[currentIndex]?.start_time ?? 0;
+        const isNearStart = youtube.currentTime - currentLyricTime < 2;
+        const targetIndex = isNearStart
+            ? Math.max(0, currentIndex - 1)
+            : currentIndex;
+        
+        youtube.seek(msToSeconds(songLyrics[targetIndex].start_time))
+    }
+
+    // seek to next lyric with music player
+    function handleNextLyric() {
+        const nextIndex = Math.min(songLyrics.length, activeIndex + 1);
+        youtube.seek(msToSeconds(songLyrics[nextIndex].start_time))
+    }
+
     return (
         <main>
             <header className="song-page-header" aria-labelledby="song-heading">
@@ -252,7 +247,13 @@ export default function SongPage() {
                     <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
                 ) : (
                     <>
-                        <Lyrics currentTime={youtube.currentTime} lyrics={songLyrics} showPronunciation={showPronunciation} simplifiedCharacters={simplifiedCharacters} origScript={song_info.orig_script} onLookup={handleLookup} />
+                        <Lyrics 
+                            activeIndex={activeIndex}
+                            lyrics={songLyrics} 
+                            showPronunciation={showPronunciation} 
+                            simplifiedCharacters={simplifiedCharacters} 
+                            origScript={song_info.orig_script} 
+                            onLookup={handleLookup} />
                     </>
                 )}
 
@@ -267,7 +268,14 @@ export default function SongPage() {
             </section>
 
             <div>
-                <MusicPlayer player={youtube} artist={song_info.artist} img={song_info.img} title={song_info.title} ytVideoId={ytVideoId || song_info.yt_url}/>
+                <MusicPlayer 
+                    player={youtube} 
+                    artist={song_info.artist} 
+                    img={song_info.img} 
+                    title={song_info.title} 
+                    ytVideoId={ytVideoId || song_info.yt_url}
+                    onPreviousLyric={handlePreviousLyric}
+                    onNextLyric={handleNextLyric}/>
             </div>
 
         </main>
