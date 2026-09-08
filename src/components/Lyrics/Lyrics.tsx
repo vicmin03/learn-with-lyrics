@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { pinyin } from "pinyin-pro";
 import { ScriptToken, tokenizeChinese } from "../../lib/chineseTokenizer";
 import { LyricsDict } from "../../types/lyrics";
@@ -51,6 +51,8 @@ function findActiveLyricIndex(lyrics: LyricsDict[], currentTime: number) {
 
 export function Lyrics({ currentTime, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
+
+    const refContainer = useRef<HTMLParagraphElement | null>(null);
 
     // for handling looking up vocabulary
     function handleLookup(word: string, trigger: HTMLElement) {
@@ -115,10 +117,22 @@ export function Lyrics({ currentTime, lyrics, showPronunciation, simplifiedChara
         };
     }, [lyrics, origScript]);
 
+    // scroll to current lyric whenever activeIndex (line) changes
+    useEffect(() => {
+        refContainer.current?.scrollIntoView?.({
+            behavior: "smooth",
+            block: "center"
+        });
+    }, [activeIndex, tokenizedLyrics.length]);
+
     return (
         <div>
             {tokenizedLyrics.map((line, index) => (
-                <p key={line.id} className="song-lyrics">
+                <p
+                    key={line.id}
+                    className="song-lyrics"
+                    ref={index === activeIndex ? refContainer : null}
+                >
                     {line.tokens.map((token) => {
                         if (isWhitespace(token)) {
                             return " ";

@@ -23,7 +23,6 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  margin-right: 
 }
 
 .lyrics-token.active {
@@ -39,4 +38,3 @@
   outline-offset: 3px;
   border-radius: 2px;
 }       
-    
