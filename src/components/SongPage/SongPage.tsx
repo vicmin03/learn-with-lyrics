@@ -10,11 +10,10 @@ import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { fetchVideoId } from '../../lib/youtubeSearch';
 import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
-import { msToSeconds, splitLyrics, formatName } from '../../lib/helperFunctions'
+import { msToSeconds } from '../../lib/helperFunctions'
+import { fetchLyricsWithFallback } from '../../lib/lyricsSearch';
 import './SongPage.css';
 
-
-const API_URL = 'https://wilooper-lyrica.hf.space/lyrics/';
 
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
@@ -63,6 +62,8 @@ export default function SongPage() {
 
     // fetch youtube url to display video embed on initial render
     useEffect( () => {
+        let isCancelled = false;
+
         async function fetchURL() {
             if (!song_info) {
                 return;
@@ -70,7 +71,9 @@ export default function SongPage() {
 
             try {
                 const videoId = await fetchVideoId(song_info.artist, song_info.title);
-                setYtVideoId(videoId);
+                if (!isCancelled) {
+                    setYtVideoId(videoId);
+                }
             } catch (error) {
                 console.error('Failed to fetch YouTube video', error);
             }
@@ -80,6 +83,10 @@ export default function SongPage() {
             fetchURL();
             // TODO: save newly fetched url to database for quicker retrieval next time
         }
+
+        return () => {
+            isCancelled = true;
+        };
     }, [song_info])
 
     // fetch lyrics from API on initial render
@@ -88,50 +95,24 @@ export default function SongPage() {
             return;
         }
 
-        let isCancelled = false;
+        const controller = new AbortController();
 
         const fetchLyrics = async () => {
             setIsLoading(true);
             setErrorMessage(null);
+            setSongLyrics([]);
+            setHasTimestamps(false);
 
             try {
-                const url = `${API_URL}?artist=${formatName(song_info.artist)}&song=${formatName(song_info.title)}&timestamps=true&fast=true`;
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-
-                const json = await response.json();
-                console.log(json)
-                const hasTimestamp = Boolean(json.data.hasTimestamps);
-
-                // store lyrics as array of lyrics dictionaries
-                let lyric_lines: LyricsDict[];
-
-                if (hasTimestamp && Array.isArray(json?.data?.timed_lyrics)) {
-                    lyric_lines = json.data.timed_lyrics;
-                }
-                else {
-                    const lyrics = typeof json?.data?.lyrics === 'string' ? json.data.lyrics : '';
-                    // need to split lyric string into separate lines
-                    lyric_lines = splitLyrics(lyrics, hasTimestamp);
-                }
-                
-                if (!isCancelled) {
-                    setSongLyrics(lyric_lines);
-                    setHasTimestamps(hasTimestamp);
-                    console.log(lyric_lines);
-                }
-            } catch (error) {
-                console.error('Failed to fetch lyrics', error);
-
-                if (!isCancelled) {
+                const result = await fetchLyricsWithFallback(song_info, controller.signal);
+                setSongLyrics(result.lyrics);
+                setHasTimestamps(result.hasTimestamps);
+            } catch {
+                if (!controller.signal.aborted) {
                     setErrorMessage('Unable to load lyrics right now.');
-                    setSongLyrics([]);
                 }
             } finally {
-                if (!isCancelled) {
+                if (!controller.signal.aborted) {
                     setIsLoading(false);
                 }
             }
@@ -139,11 +120,7 @@ export default function SongPage() {
 
         fetchLyrics();
 
-        // defines the cleanup function to be run on unmounting/rerendering based on dependencies changing
-        // isCancelled flag ensures that outdated results of a fetch aren't displayed if component/song changes
-        return () => {
-            isCancelled = true;
-        };
+        return () => controller.abort();
     }, [song_info]);
 
     if (!song_info) {

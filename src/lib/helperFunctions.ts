@@ -4,6 +4,7 @@ import { LyricsDict } from '../types/lyrics';
 export function formatName(name: string): string {
     return name.split(' ').join('%20');
 }
+
 // convert timestamp string to milliseconds (used if timed_lyrics doesn't already exist)
 export function timestampToMs(timestamp: string): number {
     const [minutes, seconds] = timestamp.split(':');
