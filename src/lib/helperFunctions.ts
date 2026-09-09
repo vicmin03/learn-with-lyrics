@@ -1,10 +1,5 @@
 import { LyricsDict } from '../types/lyrics';
 
-// add %20 between spaces in song title/artist for API calls.
-export function formatName(name: string): string {
-    return name.split(' ').join('%20');
-}
-
 // convert timestamp string to milliseconds (used if timed_lyrics doesn't already exist)
 export function timestampToMs(timestamp: string): number {
     const [minutes, seconds] = timestamp.split(':');

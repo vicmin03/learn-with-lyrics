@@ -22,6 +22,7 @@ interface LyricsApiData {
     lyrics?: string;
 }
 
+// for removing lines of artist credits from song lyrics
 function isCreditLine(line: LyricsDict): boolean {
     return /[:：]/.test(line.text);
 }
@@ -41,6 +42,7 @@ export function removeBoundaryCreditLines(lyrics: LyricsDict[]): LyricsDict[] {
     return lyrics.slice(firstLyricIndex, lastLyricIndex + 1);
 }
 
+// consider searching songs based on title/artist in both original language and english in case search fails
 export function buildLyricQueries(song: SongMetadata): [string, string][] {
     const combinations: [string | undefined, string | undefined][] = [
         [song.title, song.artist],
