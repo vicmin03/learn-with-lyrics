@@ -6,11 +6,7 @@
   font-size: 24px;
   padding-bottom: 10px;
   font-weight: 500;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .song-info {
@@ -22,6 +18,12 @@
   justify-content: start;
   flex: 1;
   min-width: 0;
+}
+
+.song-language {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text);
 }
 
 .song-card {

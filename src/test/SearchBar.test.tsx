@@ -2,7 +2,7 @@ import { useState } from "react";
 import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SearchBar from '../components/SearchBar';
+import { SearchBar } from '../components/SearchBar';
 
 // helper function to render example of search bar with state
 function TestSearchBar() {

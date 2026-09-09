@@ -21,7 +21,7 @@ export function SongCard (props: CardProps) {
                 <h2 className="song-title" lang={languageCode}>{props.title}</h2>
                 {props.eng_title && <p className="song-title" lang="en">({props.eng_title})</p>}
                 <p>{props.artist}</p>
-                <p>{props.language}</p>
+                <p className="song-language">{props.language}</p>
             </div>
         </div>
     )
