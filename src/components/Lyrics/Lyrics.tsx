@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { pinyin } from "pinyin-pro";
-import { ScriptToken, tokenizeChinese } from "../lib/chineseTokenizer";
-import { LyricsDict } from "../types/lyrics";
-import { createConverter } from "../lib/convertScript";
+import { ScriptToken, tokenizeChinese } from "../../lib/chineseTokenizer";
+import { LyricsDict } from "../../types/lyrics";
+import { createConverter } from "../../lib/convertScript";
+import "./Lyrics.css"
 
 
 export interface TokenizedLyric extends LyricsDict{
@@ -10,6 +11,7 @@ export interface TokenizedLyric extends LyricsDict{
 }
 
 interface LyricsProps {
+    activeIndex: number,
     lyrics: LyricsDict[],
     showPronunciation: boolean,
     simplifiedCharacters: boolean,
@@ -21,13 +23,44 @@ function isWhitespace(token: ScriptToken) {
     return /^\s+$/.test(token.simplified);
 }
 
-export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
+// // convert milliseconds to seconds for easier comparison with currentTime
+// function msToSeconds(timestamp: number) {
+//     return timestamp / 1000;
+// }
+
+// function findActiveLyricIndex(lyrics: LyricsDict[], currentTime: number) {
+//     let low = 0;
+//     let high = lyrics.length - 1;
+//     let activeIndex = -1;
+
+//     while (low <= high) {
+//         const middle = Math.floor((low + high) / 2);
+//         const lyricStart = msToSeconds(lyrics[middle].start_time);
+
+//         if (lyricStart <= currentTime) {
+//             activeIndex = middle;
+//             low = middle + 1;
+//         } else {
+//             high = middle - 1;
+//         }
+//     }
+
+//     return activeIndex;
+// }
+
+
+export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
+
+    const refContainer = useRef<HTMLParagraphElement | null>(null);
 
     // for handling looking up vocabulary
     function handleLookup(word: string, trigger: HTMLElement) {
         onLookup(word, trigger);
     }
+
+    // // find which line is currently being played
+    // const activeIndex = findActiveLyricIndex(lyrics, currentTime);
 
     // set up lyrics for toggling pronunciation and script
     // convert between simplified and traditional and prepare pinyin into token for quick conversion
@@ -84,10 +117,24 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
         };
     }, [lyrics, origScript]);
 
+    // scroll to current lyric whenever activeIndex (line) changes
+    useEffect(() => {
+        if (activeIndex < 0) return;
+
+        refContainer.current?.scrollIntoView?.({
+            behavior: "smooth",
+            block: "center"
+        });
+    }, [activeIndex, tokenizedLyrics.length]);
+
     return (
         <div>
-            {tokenizedLyrics.map((line) => (
-                <p key={line.id} className="song-lyrics">
+            {tokenizedLyrics.map((line, index) => (
+                <p
+                    key={line.id}
+                    className="song-lyrics"
+                    ref={index === activeIndex ? refContainer : null}
+                >
                     {line.tokens.map((token) => {
                         if (isWhitespace(token)) {
                             return " ";
@@ -96,6 +143,8 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
                         const displayedWord = simplifiedCharacters
                             ? token.simplified
                             : token.traditional;
+
+
 
                         return (
                             <span
@@ -107,7 +156,7 @@ export function Lyrics({ lyrics, showPronunciation, simplifiedCharacters, origSc
                                 </span>}
                                 <button
                                     type="button"
-                                    className="lyrics-token"
+                                    className={index <= activeIndex ? "lyrics-token active" : "lyrics-token"}
                                     lang="zh"
                                     onClick={(event) => handleLookup(displayedWord, event.currentTarget)}>
                                     {displayedWord}                                

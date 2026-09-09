@@ -15,14 +15,20 @@ function formatTime(seconds: number): string {
 
 
 interface MusicPlayerProps {
+    player: ReturnType<typeof useYouTubePlayer>,
     img: string,
     artist: string,
     title: string,
-    ytVideoId: string
+    ytVideoId: string,
+    onPreviousLyric: () => void,
+    onNextLyric: () => void,
+    canSeekLyrics: boolean
+
 }
 
 export function MusicPlayer(props: MusicPlayerProps) {
-    const youtube = useYouTubePlayer();
+    // const youtube = useYouTubePlayer();
+    const youtube = props.player
     const [volume, setVolume] = useState(100);
     const isLoading = !youtube.ready;
 
@@ -108,7 +114,10 @@ export function MusicPlayer(props: MusicPlayerProps) {
                         aria-valuetext={`${formatTime(youtube.currentTime)} of ${formatTime(youtube.totalDuration)}`}
                     />
                     <div className="music-player-buttons" role="group" aria-label="Song navigation and playback">
-                        <IconButton disabled={isLoading} aria-label="Previous song">
+                        <IconButton
+                            disabled={isLoading || !props.canSeekLyrics}
+                            aria-label="Previous song"
+                            onClick={props.onPreviousLyric}>
                             <IoPlayBackCircle className="music-player-icon"/>
                         </IconButton> 
                         <IconButton 
@@ -117,7 +126,10 @@ export function MusicPlayer(props: MusicPlayerProps) {
                             onClick={handlePlay}>
                             {youtube.isPlaying ? <IoPauseCircle className="music-player-play-button"/> : <IoPlayCircle className="music-player-play-button"/>}
                         </IconButton> 
-                        <IconButton disabled={isLoading} aria-label="Next song">
+                        <IconButton    
+                            disabled={isLoading || !props.canSeekLyrics}
+                            aria-label="Next song"
+                            onClick={props.onNextLyric}>
                             <IoPlayForwardCircle className="music-player-icon"/>
                         </IconButton> 
                     </div>
@@ -142,7 +154,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
                         aria-label="volume"
                         min={0}
                         max={100}
-                        value={youtube.isMute ? 0 : volume}
+                        value={youtube.isMute ? 0 : (volume ?? 100)}
                         orientation="vertical"
                         track="normal"
                         disabled={isLoading}

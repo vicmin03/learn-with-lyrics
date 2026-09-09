@@ -4,6 +4,7 @@
         "title":"永不失聯的愛",
         "eng_title":"Unbreakable Love",
         "artist":"Eric Chou",
+        "artist_eng": "Eric Chou",
         "img":"/song_covers/unbreakable_love.jpg",
         "language":"Chinese",
         "orig_script": "tw",
@@ -14,6 +15,7 @@
         "title": "如果可以",
         "eng_title":"Red Scarf",
         "artist":"WeiBird",
+        "artist_eng": "WeiBird",
         "img":"/song_covers/red_scarf.jpg",
         "language":"Chinese",
         "orig_script":"tw",
@@ -24,6 +26,7 @@
         "title": "太陽與地球",
         "eng_title":"Sun and Earth",
         "artist":"Crowd Lu",
+        "artist_eng": "Crowd Lu",
         "img":"/song_covers/sun_and_earth.jpg",
         "language":"Chinese",
         "orig_script": "tw",
@@ -34,10 +37,21 @@
         "title": "戒烟",
         "eng_title":"Quit Smoking",
         "artist":"李荣浩",
+        "artist_eng": "Li Ronghao",
         "img":"/song_covers/quit_smoking.png",
         "language":"Chinese",
         "orig_script": "cn",
         "yt_url": "4odeawiRtTk"
+    },
+    {
+        "id": 5,
+        "title": "才二十三",
+        "eng_title": "Twenty Three",
+        "artist": "Khalil Fong",
+        "artist_eng": "Khalil Fong",
+        "img": "/song_covers/twenty_three.jpg",
+        "language":"Chinese",
+        "orig_script":"tw",
+        "yt_url": "y2N7Imnmwhk"
     }
-
 ]

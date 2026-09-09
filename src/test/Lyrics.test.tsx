@@ -23,7 +23,7 @@ vi.mock('pinyin-pro', () => ({
     pinyin: (s: string) => `py(${s})`,
 }));
 
-const { Lyrics } = await import('../components/Lyrics');
+const { Lyrics } = await import('../components/Lyrics/Lyrics');
 
 describe('Lyrics', () => {
     beforeEach(() => {
@@ -43,6 +43,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -65,6 +66,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -82,6 +84,7 @@ describe('Lyrics', () => {
     test('renders nothing when no lyrics provided', () => {
         render(
             <Lyrics
+                activeIndex={-1}
                 lyrics={[]}
                 showPronunciation={false}
                 simplifiedCharacters={true}
@@ -99,6 +102,7 @@ describe('Lyrics', () => {
 
         render(
             <Lyrics
+                activeIndex={0}
                 lyrics={lyrics}
                 showPronunciation={true}
                 simplifiedCharacters={true}
@@ -111,5 +115,66 @@ describe('Lyrics', () => {
         expect(await screen.findByText('你好')).toBeInTheDocument();
         // pronunciation text should be present (from mocked pinyin-pro)
         expect(screen.getAllByText(/py\(/).length).toBeGreaterThan(0);
+    });
+
+    test('highlights the latest lyric that has started', async () => {
+        const lyrics = [
+            { id: 'lrc_0', start_time: 0, text: 'First line' },
+            { id: 'lrc_1', start_time: 1000, text: 'Second line' },
+        ];
+
+        render(
+            <Lyrics
+                activeIndex={1}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        expect(await screen.findByRole('button', { name: 'Second' })).toHaveClass('active');
+        expect(screen.getByRole('button', { name: 'First' })).toHaveClass('active');
+    });
+
+    test('scrolls the active lyric into the center of the page', async () => {
+        const scrollIntoView = vi.fn();
+        HTMLElement.prototype.scrollIntoView = scrollIntoView;
+        const lyrics = [
+            { id: 'lrc_0', start_time: 0, text: 'First line' },
+            { id: 'lrc_1', start_time: 1000, text: 'Second line' },
+        ];
+
+        const { rerender } = render(
+            <Lyrics
+                activeIndex={0}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        await screen.findByRole('button', { name: 'First' });
+        scrollIntoView.mockClear();
+
+        rerender(
+            <Lyrics
+                activeIndex={1}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+            />
+        );
+
+        await screen.findByRole('button', { name: 'Second' });
+        expect(scrollIntoView).toHaveBeenCalledWith({
+            behavior: 'smooth',
+            block: 'center',
+        });
     });
 });

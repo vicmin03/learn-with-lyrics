@@ -35,13 +35,9 @@ describe('Navbar', () => {
         );
 
         const languageSelect = screen.getByLabelText('language select');
-
         await user.click(languageSelect);
-
         const koreanOption = await screen.findByRole('option', { name: 'Korean' });
-
         await user.click(koreanOption);
-
         expect(languageSelect).toHaveTextContent('Korean');
     });
 

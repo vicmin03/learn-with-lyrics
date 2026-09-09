@@ -79,6 +79,11 @@
     color: var(--accent);
 }
 
+.music-player-buttons .MuiIconButton-root.Mui-disabled .music-player-icon {
+    color: var(--text);
+    opacity: 0.5;
+}
+
 .music-player-play-button {
     font-size: 40px;
     color: var(--accent);

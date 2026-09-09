@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MusicPlayer } from '../components/MusicPlayer/MusicPlayer';
+import type { YouTubePlayer } from 'react-youtube';
 
 const youtubePlayer = {
     playVideo: vi.fn(),
     pauseVideo: vi.fn(),
+    seekTo: vi.fn(),
     mute: vi.fn(),
     unMute: vi.fn(),
     setVolume: vi.fn(),
@@ -16,6 +18,8 @@ const youtubePlayer = {
 };
 
 let autoReady = true;
+const onPreviousLyric = vi.fn();
+const onNextLyric = vi.fn();
 
 function MockYouTube({ onReady }: { onReady: (event: { target: typeof youtubePlayer }) => void }) {
     useEffect(() => {
@@ -25,6 +29,55 @@ function MockYouTube({ onReady }: { onReady: (event: { target: typeof youtubePla
     }, [onReady]);
 
     return <div data-testid="youtube-player" />;
+}
+
+function TestPlayer({ canSeekLyrics = true }: { canSeekLyrics?: boolean }) {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMute, setIsMute] = useState(false);
+    const [ready] = useState(autoReady);
+
+    const player = useMemo(() => ({
+        player: ready ? youtubePlayer as unknown as YouTubePlayer : null,
+        isPlaying,
+        currentTime: 0,
+        totalDuration: 180,
+        progress: 0,
+        onReady: vi.fn(),
+        onStateChange: vi.fn(),
+        play: () => {
+            youtubePlayer.playVideo();
+            setIsPlaying(true);
+        },
+        pause: () => {
+            youtubePlayer.pauseVideo();
+            setIsPlaying(false);
+        },
+        seek: vi.fn(),
+        mute: () => {
+            youtubePlayer.mute();
+            setIsMute(true);
+        },
+        unmute: () => {
+            youtubePlayer.unMute();
+            setIsMute(false);
+        },
+        isMute,
+        getVolume: () => youtubePlayer.getVolume(),
+        ready,
+    }), [isMute, isPlaying, ready]);
+
+    return (
+        <MusicPlayer
+            player={player}
+            img="cover.jpg"
+            artist="Example artist"
+            title="Example song"
+            ytVideoId="video-id"
+            onPreviousLyric={onPreviousLyric}
+            onNextLyric={onNextLyric}
+            canSeekLyrics={canSeekLyrics}
+        />
+    );
 }
 
 vi.mock('react-youtube', () => ({
@@ -40,14 +93,7 @@ describe('Music Player', () => {
         youtubePlayer.getCurrentTime.mockResolvedValue(65);
     });
 
-    const renderPlayer = () => render(
-        <MusicPlayer
-            img="cover.jpg"
-            artist="Example artist"
-            title="Example song"
-            ytVideoId="video-id"
-        />
-    );
+    const renderPlayer = () => render(<TestPlayer />);
 
     test('Music player component loads all elements correctly', async () => {
         renderPlayer();
@@ -76,6 +122,17 @@ describe('Music Player', () => {
         await user.click(screen.getByRole('button', { name: 'Pause' }));
         expect(youtubePlayer.pauseVideo).toHaveBeenCalledOnce();
         expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    });
+
+    test('previous and next lyric buttons call their seek callbacks', async () => {
+        const user = userEvent.setup();
+        renderPlayer();
+
+        await user.click(await screen.findByRole('button', { name: 'Previous song' }));
+        await user.click(screen.getByRole('button', { name: 'Next song' }));
+
+        expect(onPreviousLyric).toHaveBeenCalledOnce();
+        expect(onNextLyric).toHaveBeenCalledOnce();
     });
 
     test('volume control contains the volume slider', async () => {
@@ -129,5 +186,12 @@ describe('Music Player', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Play' }));
         expect(youtubePlayer.playVideo).not.toHaveBeenCalled();
+    });
+
+    test('disables lyric navigation when lyrics have no timestamps', () => {
+        render(<TestPlayer canSeekLyrics={false} />);
+
+        expect(screen.getByRole('button', { name: 'Previous song' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Next song' })).toBeDisabled();
     });
 });
