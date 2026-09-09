@@ -22,6 +22,25 @@ interface LyricsApiData {
     lyrics?: string;
 }
 
+function isCreditLine(line: LyricsDict): boolean {
+    return /[:：]/.test(line.text);
+}
+
+export function removeBoundaryCreditLines(lyrics: LyricsDict[]): LyricsDict[] {
+    let firstLyricIndex = 0;
+    let lastLyricIndex = lyrics.length - 1;
+
+    while (firstLyricIndex <= lastLyricIndex && isCreditLine(lyrics[firstLyricIndex])) {
+        firstLyricIndex += 1;
+    }
+
+    while (lastLyricIndex >= firstLyricIndex && isCreditLine(lyrics[lastLyricIndex])) {
+        lastLyricIndex -= 1;
+    }
+
+    return lyrics.slice(firstLyricIndex, lastLyricIndex + 1);
+}
+
 export function buildLyricQueries(song: SongMetadata): [string, string][] {
     const combinations: [string | undefined, string | undefined][] = [
         [song.title, song.artist],
@@ -55,11 +74,12 @@ function hasLyrics(data: unknown): data is LyricsApiData {
 
 function toLyricsResult(data: LyricsApiData): LyricsResult {
     const hasTimedLyrics = Boolean(data.timed_lyrics?.length);
+    const lyrics = hasTimedLyrics
+        ? data.timed_lyrics ?? []
+        : splitLyrics(data.lyrics ?? '', false);
 
     return {
-        lyrics: hasTimedLyrics
-            ? data.timed_lyrics ?? []
-            : splitLyrics(data.lyrics ?? '', false),
+        lyrics: removeBoundaryCreditLines(lyrics),
         hasTimestamps: Boolean(data.hasTimestamps && hasTimedLyrics),
     };
 }
@@ -90,7 +110,8 @@ export async function fetchLyricsWithFallback(
 
             const json = await response.json();
             if (hasLyrics(json?.data)) {
-                return toLyricsResult(json.data);
+                const result = toLyricsResult(json.data);
+                if (result.lyrics.length > 0) return result;
             }
         } catch (error) {
             if (signal?.aborted) throw error;
