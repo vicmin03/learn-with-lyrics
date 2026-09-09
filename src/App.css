@@ -12,49 +12,10 @@
   margin: 15px;
 }
 
-.navbar {
-  width: 100%;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  background-color: #f6baba;
-}
-
-.logo {
-  flex: 2;
-  font-size: 1.5rem;
-  font-weight: 500;
-}
-
-.logo-link {
-  text-decoration: none;
-  color: inherit;
-  margin-right: 2rem;
-}
-
-.language-select {
-  flex: 0 1 auto;
-}
-
-.select {
-  background-color: transparent;
-}
-
-.select .MuiSelect-select {
-  border-color: transparent;
-  font-size: 120%;
-}
-
-.select .MuiSelect-select:focus-visible {
-  border: 2px solid blue;
-  border-radius: 5px;
-}
-
 .current-langs {
-  flex: 1;
   justify-content: space-between;
-  align-items: center;
+  margin-right: auto;
+  align-items: end;
 }
 
 .flag {
@@ -68,9 +29,9 @@
   margin-right: 0.2rem;
 }
 
-.large-icons {
-  width: 30px;
-  height: 30px;
+.large-icon {
+  width: 25px;
+  height: 25px;
 }
 
 .song-title {

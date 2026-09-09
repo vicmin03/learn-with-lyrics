@@ -1,0 +1,74 @@
+import { useState, useId } from "react";
+import { IoSearch, IoChevronDown } from "react-icons/io5";
+import { Menu, Button, IconButton, MenuItem } from "@mui/material";
+import { Link } from 'react-router-dom';
+import "./NavBar.css";
+
+export default function Navbar() {
+    // for languages menu, which opens from anchor element button
+    const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorElement);
+    const id = useId();
+    const buttonId = `${id}-button`;
+    const menuId = `${id}-menu`;
+
+    // handle opening languages menu
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorElement(e.currentTarget);
+    }
+
+    const handleClose = () => {
+        setAnchorElement(null);
+    }
+
+    return (
+        <nav className="navbar" aria-label="navigation">
+            <Link to={'/'} className="logo-link">
+                <span className="logo">Learn With Lyrics</span>
+            </Link>
+            
+            
+            <div className="language-menu">                
+                <Button
+                    className="menu-button"
+                    id={buttonId}
+                    onClick={handleClick}
+                    aria-controls={open ? menuId : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open}
+                    endIcon={<IoChevronDown/>}
+                >
+                    Languages
+                </Button>
+                <Menu
+                    open={Boolean(anchorElement)}
+                    anchorEl={anchorElement}
+                    onClose={handleClose}
+                    slotProps={{
+                        paper: {
+                            className: "language-menu-paper",
+                        },
+                        list: {
+                            'aria-labelledby': buttonId,
+                        },
+                    }}
+                >
+
+                    <MenuItem className="language-menu-item" value="Chinese">Chinese</MenuItem>
+                    <MenuItem className="language-menu-item" value="Japanese">Japanese</MenuItem>
+                    <MenuItem className="language-menu-item" value="Korean">Korean</MenuItem>
+                </Menu>
+            </div>
+            
+
+            <IconButton className="navbar-search-icon">
+                <IoSearch 
+                    className="large-icon"
+                />
+            </IconButton>
+
+
+
+        </nav>
+    )
+}
