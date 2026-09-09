@@ -119,6 +119,8 @@ export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedChara
 
     // scroll to current lyric whenever activeIndex (line) changes
     useEffect(() => {
+        if (activeIndex < 0) return;
+
         refContainer.current?.scrollIntoView?.({
             behavior: "smooth",
             block: "center"

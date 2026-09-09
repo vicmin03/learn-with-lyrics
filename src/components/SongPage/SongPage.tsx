@@ -121,6 +121,7 @@ export default function SongPage() {
                 if (!isCancelled) {
                     setSongLyrics(lyric_lines);
                     setHasTimestamps(hasTimestamp);
+                    console.log(lyric_lines);
                 }
             } catch (error) {
                 console.error('Failed to fetch lyrics', error);
@@ -181,10 +182,14 @@ export default function SongPage() {
     }
 
     // find which line is currently being played
-    const activeIndex = findActiveLyricIndex(songLyrics, youtube.currentTime);
+    const activeIndex = hasTimestamps
+        ? findActiveLyricIndex(songLyrics, youtube.currentTime)
+        : -1;
 
     // seek to previous lyric with music player OR beginning of current line if part-way through
     function handlePreviousLyric() {
+        if (!hasTimestamps || activeIndex < 0) return;
+
         const currentIndex = activeIndex;
         const currentLyricTime = msToSeconds(songLyrics[currentIndex]?.start_time ?? 0);
         const isNearStart = youtube.currentTime - currentLyricTime < 2;
@@ -197,7 +202,11 @@ export default function SongPage() {
 
     // seek to next lyric with music player
     function handleNextLyric() {
+        if (!hasTimestamps) return;
+
         const nextIndex = Math.min(songLyrics.length, activeIndex + 1);
+        if (!songLyrics[nextIndex]) return;
+
         youtube.seek(msToSeconds(songLyrics[nextIndex].start_time))
     }
 
@@ -274,7 +283,9 @@ export default function SongPage() {
                     title={song_info.title} 
                     ytVideoId={ytVideoId || song_info.yt_url}
                     onPreviousLyric={handlePreviousLyric}
-                    onNextLyric={handleNextLyric}/>
+                    onNextLyric={handleNextLyric}
+                    canSeekLyrics={hasTimestamps}
+                />
             </div>
 
         </main>

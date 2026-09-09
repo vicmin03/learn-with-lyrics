@@ -31,7 +31,7 @@ function MockYouTube({ onReady }: { onReady: (event: { target: typeof youtubePla
     return <div data-testid="youtube-player" />;
 }
 
-function TestPlayer() {
+function TestPlayer({ canSeekLyrics = true }: { canSeekLyrics?: boolean }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMute, setIsMute] = useState(false);
     const [ready] = useState(autoReady);
@@ -75,6 +75,7 @@ function TestPlayer() {
             ytVideoId="video-id"
             onPreviousLyric={onPreviousLyric}
             onNextLyric={onNextLyric}
+            canSeekLyrics={canSeekLyrics}
         />
     );
 }
@@ -185,5 +186,12 @@ describe('Music Player', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Play' }));
         expect(youtubePlayer.playVideo).not.toHaveBeenCalled();
+    });
+
+    test('disables lyric navigation when lyrics have no timestamps', () => {
+        render(<TestPlayer canSeekLyrics={false} />);
+
+        expect(screen.getByRole('button', { name: 'Previous song' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Next song' })).toBeDisabled();
     });
 });

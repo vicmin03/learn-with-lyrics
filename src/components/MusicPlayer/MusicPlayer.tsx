@@ -21,7 +21,8 @@ interface MusicPlayerProps {
     title: string,
     ytVideoId: string,
     onPreviousLyric: () => void,
-    onNextLyric: () => void
+    onNextLyric: () => void,
+    canSeekLyrics: boolean
 
 }
 
@@ -114,7 +115,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
                     />
                     <div className="music-player-buttons" role="group" aria-label="Song navigation and playback">
                         <IconButton
-                            disabled={isLoading} 
+                            disabled={isLoading || !props.canSeekLyrics}
                             aria-label="Previous song"
                             onClick={props.onPreviousLyric}>
                             <IoPlayBackCircle className="music-player-icon"/>
@@ -126,7 +127,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
                             {youtube.isPlaying ? <IoPauseCircle className="music-player-play-button"/> : <IoPlayCircle className="music-player-play-button"/>}
                         </IconButton> 
                         <IconButton    
-                            disabled={isLoading} 
+                            disabled={isLoading || !props.canSeekLyrics}
                             aria-label="Next song"
                             onClick={props.onNextLyric}>
                             <IoPlayForwardCircle className="music-player-icon"/>
@@ -153,7 +154,7 @@ export function MusicPlayer(props: MusicPlayerProps) {
                         aria-label="volume"
                         min={0}
                         max={100}
-                        value={youtube.isMute ? 0 : volume}
+                        value={youtube.isMute ? 0 : (volume ?? 100)}
                         orientation="vertical"
                         track="normal"
                         disabled={isLoading}
