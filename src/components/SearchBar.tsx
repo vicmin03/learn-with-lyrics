@@ -6,7 +6,7 @@ interface SearchProps {
     handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function SearchBar (props: SearchProps) {
+export function SearchBar (props: SearchProps) {
 
     return (
         <>

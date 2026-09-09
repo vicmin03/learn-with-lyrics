@@ -89,3 +89,11 @@
     margin: 1rem;
   }
 }
+
+#pronunciation-label {
+  font-weight: bold;
+}
+
+#script-label {
+  font-weight: bold;
+}

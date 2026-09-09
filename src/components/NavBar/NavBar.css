@@ -1,0 +1,54 @@
+.navbar {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  background-color: #f6baba;
+}
+
+.logo {
+  flex: 2;
+  font-size: 2rem;
+  font-weight: 500;
+  color: black;
+}
+
+.language-menu {
+  flex: 0 1 auto;
+}
+
+.menu-button.MuiButton-root {
+  color: #000;
+  text-transform: none;
+}
+
+.language-menu-item.MuiMenuItem-root {
+  background-color: var(--accent-bg);
+}
+
+.language-menu-item.MuiMenuItem-root:hover,
+.language-menu-item.MuiMenuItem-root:focus {
+  background-color: var(--accent-bg-hover, #f0d0d0);
+}
+
+.language-menu-paper.MuiPaper-root,
+.language-menu-paper .MuiMenu-list {
+  background-color: var(--accent-bg);
+}
+
+.language-menu-paper .MuiMenu-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  margin-right: 2rem;
+}
+
+.navbar-search-icon.MuiIconButton-root{
+  margin-left: auto;
+  margin-right: 1rem;
+}
+

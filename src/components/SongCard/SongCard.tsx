@@ -1,3 +1,6 @@
+import { languageCodes } from "../../types/languageCodes";
+import "./SongCard.css";
+
 interface CardProps {
     title: string,
     eng_title?: string,
@@ -6,14 +9,7 @@ interface CardProps {
     language: string
 }
 
-const languageCodes: Record<string, string> = {
-    Chinese: 'zh',
-    English: 'en',
-    Japanese: 'ja',
-    Korean: 'ko',
-};
-
-export default function SongCard (props: CardProps) {
+export function SongCard (props: CardProps) {
     const languageCode = languageCodes[props.language];
 
     return (
@@ -25,7 +21,7 @@ export default function SongCard (props: CardProps) {
                 <h2 className="song-title" lang={languageCode}>{props.title}</h2>
                 {props.eng_title && <p className="song-title" lang="en">({props.eng_title})</p>}
                 <p>{props.artist}</p>
-                <p>{props.language}</p>
+                <p className="song-language">{props.language}</p>
             </div>
         </div>
     )

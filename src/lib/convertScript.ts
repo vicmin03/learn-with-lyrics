@@ -1,13 +1,6 @@
 import OpenCC from 'opencc-js';
 
 
-export const languageCodes: Record<string, string> = {
-    Chinese: 'zh',
-    English: 'en',
-    Japanese: 'ja',
-    Korean: 'ko',
-};
-
 export const scripts: Record<'cn' | 'tw' | 'hk', string> = {
     'cn': 'Simplified',
     'tw': 'Traditional (Taiwan)',

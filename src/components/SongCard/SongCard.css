@@ -1,0 +1,53 @@
+
+.song-title {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  font-size: 24px;
+  padding-bottom: 10px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.song-info {
+  width: 100%;
+  padding: 1rem 1rem 1rem 0rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: start;
+  flex: 1;
+  min-width: 0;
+}
+
+.song-language {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.song-card {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid grey;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px;
+  height: 100%;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.song-cover {
+  width: clamp(80px, 40%, 150px);
+  padding: 1rem;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.song-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
