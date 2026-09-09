@@ -61,7 +61,7 @@ export default function Navbar() {
             </div>
             
 
-            <IconButton className="navbar-search-icon">
+            <IconButton className="navbar-search-icon" aria-label="Search">
                 <IoSearch 
                     className="large-icon"
                 />
