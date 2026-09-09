@@ -1,3 +1,6 @@
+import { languageCodes } from "../../types/languageCodes";
+import "./SongCard.css";
+
 interface CardProps {
     title: string,
     eng_title?: string,
@@ -6,14 +9,7 @@ interface CardProps {
     language: string
 }
 
-const languageCodes: Record<string, string> = {
-    Chinese: 'zh',
-    English: 'en',
-    Japanese: 'ja',
-    Korean: 'ko',
-};
-
-export default function SongCard (props: CardProps) {
+export function SongCard (props: CardProps) {
     const languageCode = languageCodes[props.language];
 
     return (

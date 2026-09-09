@@ -1,8 +1,8 @@
 import './App.css';
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import SongCard from './components/SongCard';
-import SearchBar from './components/SearchBar';
+import { SongCard } from './components/SongCard/SongCard';
+import { SearchBar } from './components/SearchBar';
 import song_list from './song_list.json';
 
 

@@ -12,17 +12,6 @@
   margin: 15px;
 }
 
-.current-langs {
-  justify-content: space-between;
-  margin-right: auto;
-  align-items: end;
-}
-
-.flag {
-  height: 30px;
-  width: 50px;
-}
-
 .small-icon {
   width: 15px;
   height: 15px;
@@ -33,58 +22,6 @@
   width: 25px;
   height: 25px;
 }
-
-.song-title {
-  width: 100%;
-  margin: 0;
-  text-align: left;
-  font-size: 24px;
-  padding-bottom: 10px;
-  font-weight: 500;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
-}
-
-.song-info {
-  width: 100%;
-  padding: 1rem 1rem 1rem 0rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: start;
-  flex: 1;
-  min-width: 0;
-}
-
-.song-card {
-  display: flex;
-  flex-direction: row;
-  border: 1px solid grey;
-  border-radius: 10px;
-  box-shadow: 5px 5px 5px;
-  height: 100%;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.song-cover {
-  width: clamp(80px, 40%, 150px);
-  padding: 1rem;
-  aspect-ratio: 1/1;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.song-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
 
 .songs-list {
   display: grid;
