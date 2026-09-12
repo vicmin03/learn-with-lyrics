@@ -3,10 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useAsyncValue } from 'react-router-dom';
 import { SongCard } from './components/SongCard/SongCard';
 import { SearchBar } from './components/SearchBar';
-import { supabase } from './lib/supabaseClient'
+import { supabase } from './lib/supabaseClient';
 import { Song } from './types/song';
-// import song_list from './song_list.json';
-
 
 function Home() {
   // control state of search bar and debouncing text
