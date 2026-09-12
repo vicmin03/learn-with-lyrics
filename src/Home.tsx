@@ -11,6 +11,7 @@ function Home() {
   const [searchText, setSearchText] = useState<string>("");
   const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
   const [songList, setSongList] = useState<Song[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
 
   // add debounce of 5ms so only filters song after user stops typing 
@@ -29,6 +30,12 @@ function Home() {
   // fetch and filter songs based on user input to search bar
   useEffect(() => {
       const fetchSongs = async() => {
+        if (!supabase) {
+          setLoadError('Song browsing is unavailable because the database is not configured.');
+          return;
+        }
+
+        setLoadError(null);
         // fetch and filter songs according to search
         let query = supabase.from("songs_with_artists").select("*");
 
@@ -45,6 +52,7 @@ function Home() {
 
         if (error) {
           console.error(error);
+          setLoadError('Unable to load songs right now.');
           return;
         }
         setSongList(data);
@@ -60,11 +68,15 @@ function Home() {
       <section id="center">
         <h2 className="visually-hidden">Song results</h2>
         <p className="results-status" aria-live="polite" aria-atomic="true">
-          {songList.length === 0
+          {loadError
+            ? loadError
+            : songList.length === 0
             ? 'No songs found.'
             : `${songList.length} ${songList.length === 1 ? 'song' : 'songs'} found.`}
         </p>
-        {songList.length === 0 ? (
+        {loadError ? (
+          <p role="alert">{loadError}</p>
+        ) : songList.length === 0 ? (
           <p role="status">Try searching for a different song title.</p>
         ) : (
           <ul className="songs-list">

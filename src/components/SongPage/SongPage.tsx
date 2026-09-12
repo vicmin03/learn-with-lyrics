@@ -41,21 +41,33 @@ export default function SongPage() {
                 return;
             }
 
-            const { data, error } = await supabase
-                .from("songs_with_artists")
-                .select("*")
-                .eq("song_id", song_id)
-                .single();
-
-            if (error) {
-                console.error(error);
-                setSongInfo(null);
+            if (!supabase) {
+                setErrorMessage('Song data is unavailable because the database is not configured.');
                 setIsSongLoading(false);
                 return;
             }
 
-            setSongInfo(data as Song);
-            setIsSongLoading(false);
+            try {
+                const { data, error } = await supabase
+                    .from("songs_with_artists")
+                    .select("*")
+                    .eq("song_id", song_id)
+                    .single();
+
+                if (error) {
+                    console.error(error);
+                    setSongInfo(null);
+                    setIsSongLoading(false);
+                    return;
+                }
+
+                setSongInfo(data as Song);
+            } catch (error) {
+                console.error(error);
+                setErrorMessage('Unable to load song data right now.');
+            } finally {
+                setIsSongLoading(false);
+            }
         } 
         getSongInfo();
     }, [song_id])
@@ -159,6 +171,14 @@ export default function SongPage() {
         return (
             <main>
                 <p role="status" aria-live="polite">Loading song...</p>
+            </main>
+        );
+    }
+
+    if (errorMessage && !songInfo) {
+        return (
+            <main>
+                <p role="alert">{errorMessage}</p>
             </main>
         );
     }
