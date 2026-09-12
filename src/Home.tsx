@@ -28,13 +28,7 @@ function Home() {
     setSearchText(e.target.value);
   }
 
-  // filter songs based on user input to search bar
-  const filterSongs = useMemo(() => {
-    return songList.filter((song) => 
-      song.orig_title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()))
-    // TODO: filter by artist name as well with SQL join? 
-  }, [debouncedSearchText]);
-
+  // fetch and filter songs based on user input to search bar
   useEffect(() => {
       const fetchSongs = async() => {
         // fetch and filter songs according to search
@@ -45,7 +39,7 @@ function Home() {
           const search = debouncedSearchText.trim();
 
           query = query.or(
-            `orig_title.ilike.%${search}%,eng_title.ilike.%${search}%`
+            `orig_title.ilike.%${search}%,eng_title.ilike.%${search}%,artist_name.ilike.%${search}%,artist_eng_name.ilike.%${search}%`
           );
         }
 
@@ -55,10 +49,7 @@ function Home() {
           console.error(error);
           return;
         }
-        console.log(data);
-
         setSongList(data);
-        console.log(data);
     }
 
     fetchSongs();

@@ -13,7 +13,10 @@
     width: 30%;
     box-sizing: border-box;
     flex: 0 1 30%;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(99, 99, 99) transparent;
 }
+
 
 .vocab-pronunciation {
     text-align: left;
