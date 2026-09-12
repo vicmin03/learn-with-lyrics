@@ -1,21 +1,24 @@
 import './App.css';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SongCard } from './components/SongCard/SongCard';
 import { SearchBar } from './components/SearchBar';
-import song_list from './song_list.json';
-
+import { supabase } from './lib/supabaseClient';
+import { Song } from './types/song';
 
 function Home() {
   // control state of search bar and debouncing text
   const [searchText, setSearchText] = useState<string>("");
-  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("")
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  const [songList, setSongList] = useState<Song[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
 
   // add debounce of 5ms so only filters song after user stops typing 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchText(searchText);
-    }, 300)
+    }, 200)
     return () => clearTimeout(timer);
   }, [searchText])
 
@@ -24,12 +27,39 @@ function Home() {
     setSearchText(e.target.value);
   }
 
-  // filter songs based on user input to search bar
-  const valid_songs = useMemo(() => {
-    return song_list.filter((song) => 
-    song.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.eng_title.toLowerCase().includes(debouncedSearchText.toLowerCase()) || song.artist.toLowerCase().includes(debouncedSearchText.toLowerCase()))
-  }, [debouncedSearchText]);
+  // fetch and filter songs based on user input to search bar
+  useEffect(() => {
+      const fetchSongs = async() => {
+        if (!supabase) {
+          setLoadError('Song browsing is unavailable because the database is not configured.');
+          return;
+        }
 
+        setLoadError(null);
+        // fetch and filter songs according to search
+        let query = supabase.from("songs_with_artists").select("*");
+
+
+        if (debouncedSearchText.trim()) {
+          const search = debouncedSearchText.trim();
+
+          query = query.or(
+            `orig_title.ilike.%${search}%,eng_title.ilike.%${search}%,artist_name.ilike.%${search}%,artist_eng_name.ilike.%${search}%`
+          );
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error(error);
+          setLoadError('Unable to load songs right now.');
+          return;
+        }
+        setSongList(data);
+    }
+
+    fetchSongs();
+  }, [debouncedSearchText]);
 
   return (
     <main>
@@ -38,23 +68,27 @@ function Home() {
       <section id="center">
         <h2 className="visually-hidden">Song results</h2>
         <p className="results-status" aria-live="polite" aria-atomic="true">
-          {valid_songs.length === 0
+          {loadError
+            ? loadError
+            : songList.length === 0
             ? 'No songs found.'
-            : `${valid_songs.length} ${valid_songs.length === 1 ? 'song' : 'songs'} found.`}
+            : `${songList.length} ${songList.length === 1 ? 'song' : 'songs'} found.`}
         </p>
-        {valid_songs.length === 0 ? (
+        {loadError ? (
+          <p role="alert">{loadError}</p>
+        ) : songList.length === 0 ? (
           <p role="status">Try searching for a different song title.</p>
         ) : (
           <ul className="songs-list">
-            {valid_songs.map((song) => (
-              <li key={song.id}>
-                <Link to={`/songs/${song.id}`} className="card-link">
+            {songList.map((song) => (
+              <li key={song.song_id}>
+                <Link to={`/songs/${song.song_id}`} className="card-link">
                 <SongCard
-                title={song.title}
-                eng_title={song.eng_title}
-                artist={song.artist}
-                img={song.img}
-                language={song.language}
+                  title={song.orig_title}
+                  eng_title={song.eng_title}
+                  artist={song.artist_eng_name}
+                  img={song.cover_url}
+                  language={song.language}
                 />
                 </Link>
               </li>

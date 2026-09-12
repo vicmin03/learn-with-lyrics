@@ -37,6 +37,8 @@ export async function fetchVideoId(artist: string, title: string) {
             ),
         }))
         .sort((a: scoredVideo, b: scoredVideo) => b.score - a.score); 
+
+    console.log(ranked);
     return ranked[0].result.id.videoId;
 }
 

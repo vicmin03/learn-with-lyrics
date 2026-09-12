@@ -6,7 +6,22 @@ import {
     mockedLyricsResponse,
     mockedNoLyricsResponse,
 } from './fixtures/lyrics_fixtures';
+import mockedSongs from './fixtures/song_list_fixture';
 import { SettingsProvider } from '../contexts/SettingsProvider';
+
+const { supabaseFromMock, supabaseEqMock, supabaseSingleMock } = vi.hoisted(() => {
+    const supabaseSingleMock = vi.fn();
+    const supabaseEqMock = vi.fn(() => ({ single: supabaseSingleMock }));
+    const supabaseFromMock = vi.fn(() => ({
+        select: vi.fn(() => ({ eq: supabaseEqMock })),
+    }));
+
+    return { supabaseFromMock, supabaseEqMock, supabaseSingleMock };
+});
+
+vi.mock('../lib/supabaseClient', () => ({
+    supabase: { from: supabaseFromMock },
+}));
 
 // mock pinyin-pro for deterministic pronunciation output
 vi.mock('pinyin-pro', () => ({
@@ -40,6 +55,16 @@ const { default: SongPage } = await import('../components/SongPage/SongPage');
 describe('Song Page', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
+        supabaseFromMock.mockReturnValue({
+            select: vi.fn(() => ({ eq: supabaseEqMock })),
+        });
+        supabaseEqMock.mockReturnValue({
+            single: supabaseSingleMock,
+        });
+        supabaseSingleMock.mockImplementation(async () => ({
+            data: mockedSongs[0],
+            error: null,
+        }));
     });
 
     afterEach(() => {
@@ -63,12 +88,9 @@ describe('Song Page', () => {
             </MemoryRouter>
         );
 
-        // title and artist come from local song_list.json synchronously
-        expect(screen.getByText('永不失聯的愛')).toBeInTheDocument();
-        expect(screen.getByText('Eric Chou')).toBeInTheDocument();
-
-        // loading state is shown while fetch resolves
-        expect(screen.getByText('Loading lyrics...')).toBeInTheDocument();
+        // title and artist come from the mocked Supabase row
+        expect(await screen.findByText('Test Song One')).toBeInTheDocument();
+        expect(screen.getByText('Artist One')).toBeInTheDocument();
 
         // after fetch resolves the lyrics tokens should appear (tokenizer mocked)
         expect(await screen.findByText('Hello')).toBeInTheDocument();
@@ -99,7 +121,12 @@ describe('Song Page', () => {
         expect(await screen.findByText('Unable to load lyrics right now.')).toBeInTheDocument();
     });
 
-    test('renders Song not found for invalid id', () => {
+    test('renders Song not found for invalid id', async () => {
+        supabaseSingleMock.mockResolvedValue({
+            data: null,
+            error: { message: 'Song not found' },
+        });
+
         render(
             <MemoryRouter initialEntries={["/songs/999"]}>
                 <SettingsProvider>
@@ -110,7 +137,7 @@ describe('Song Page', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Song not found.')).toBeInTheDocument();
+        expect(await screen.findByText('Song not found.')).toBeInTheDocument();
     });
 
     test('handles empty lyrics response without crashing', async () => {

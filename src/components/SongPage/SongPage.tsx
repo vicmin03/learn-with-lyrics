@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
-import song_list from '../../song_list.json';
 import { Lyrics } from '../Lyrics/Lyrics';
 import { LyricsDict } from '../../types/lyrics';
 import VocabInfo from '../VocabInfo/VocabInfo';
@@ -12,11 +11,15 @@ import { MusicPlayer } from '../MusicPlayer/MusicPlayer';
 import useYouTubePlayer from '../../hooks/useYoutubePlayer';
 import { msToSeconds } from '../../lib/helperFunctions'
 import { fetchLyricsWithFallback } from '../../lib/lyricsSearch';
+import { supabase } from '../../lib/supabaseClient';
+import { Song } from '../../types/song';
 import './SongPage.css';
 
 
 export default function SongPage() {
     const { song_id } = useParams<{ song_id: string }>();
+    const [songInfo, setSongInfo] = useState<Song | null>(null);
+    const [isSongLoading, setIsSongLoading] = useState(true);
 
     // manage state for loading song lyrics
     const [songLyrics, setSongLyrics] = useState<LyricsDict[]>([]);
@@ -31,8 +34,44 @@ export default function SongPage() {
     // manages state for music player
     const [ytVideoId, setYtVideoId] = useState("");
 
-    // read info about song based on id (to be fetched from database)
-    const song_info = song_list.find((song) => song.id.toString() === song_id);
+    useEffect(() => {
+        const getSongInfo = async() => {
+            if (!song_id) {
+                setIsSongLoading(false);
+                return;
+            }
+
+            if (!supabase) {
+                setErrorMessage('Song data is unavailable because the database is not configured.');
+                setIsSongLoading(false);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from("songs_with_artists")
+                    .select("*")
+                    .eq("song_id", song_id)
+                    .single();
+
+                if (error) {
+                    console.error(error);
+                    setSongInfo(null);
+                    setIsSongLoading(false);
+                    return;
+                }
+
+                setSongInfo(data as Song);
+            } catch (error) {
+                console.error(error);
+                setErrorMessage('Unable to load song data right now.');
+            } finally {
+                setIsSongLoading(false);
+            }
+        } 
+        getSongInfo();
+    }, [song_id])
+    
 
     // import settings for toggling pinyin and simplified/traditional character
     const {
@@ -65,12 +104,12 @@ export default function SongPage() {
         let isCancelled = false;
 
         async function fetchURL() {
-            if (!song_info) {
+            if (!songInfo) {
                 return;
             }
 
             try {
-                const videoId = await fetchVideoId(song_info.artist, song_info.title);
+                const videoId = await fetchVideoId(songInfo.artist_eng_name, songInfo.orig_title);
                 if (!isCancelled) {
                     setYtVideoId(videoId);
                 }
@@ -79,7 +118,7 @@ export default function SongPage() {
             }
         }
 
-        if (!song_info?.yt_url) {
+        if (!songInfo?.yt_url) {
             fetchURL();
             // TODO: save newly fetched url to database for quicker retrieval next time
         }
@@ -87,11 +126,11 @@ export default function SongPage() {
         return () => {
             isCancelled = true;
         };
-    }, [song_info])
+    }, [songInfo])
 
     // fetch lyrics from API on initial render
     useEffect(() => {
-        if (!song_info) {
+        if (!songInfo) {
             return;
         }
 
@@ -104,7 +143,12 @@ export default function SongPage() {
             setHasTimestamps(false);
 
             try {
-                const result = await fetchLyricsWithFallback(song_info, controller.signal);
+                const result = await fetchLyricsWithFallback({
+                    title: songInfo.orig_title,
+                    eng_title: songInfo.eng_title,
+                    artist: songInfo.artist_name,
+                    artist_eng: songInfo.artist_eng_name,
+                }, controller.signal);
                 setSongLyrics(result.lyrics);
                 setHasTimestamps(result.hasTimestamps);
             } catch {
@@ -121,9 +165,25 @@ export default function SongPage() {
         fetchLyrics();
 
         return () => controller.abort();
-    }, [song_info]);
+    }, [songInfo]);
 
-    if (!song_info) {
+    if (isSongLoading) {
+        return (
+            <main>
+                <p role="status" aria-live="polite">Loading song...</p>
+            </main>
+        );
+    }
+
+    if (errorMessage && !songInfo) {
+        return (
+            <main>
+                <p role="alert">{errorMessage}</p>
+            </main>
+        );
+    }
+
+    if (!songInfo) {
         return (
             <main>
                 <h1>Song not found.</h1>
@@ -192,9 +252,9 @@ export default function SongPage() {
             <header className="song-page-header" aria-labelledby="song-heading">
 
                 <div className="song-page-info">
-                    <h1 id="song-heading" className="song-page-title" lang="zh">{song_info.title}</h1>
-                    {song_info.eng_title && <p className="song-page-alt-title" lang="en">({song_info.eng_title})</p>}
-                    <p className="song-page-artist">{song_info.artist}</p>
+                    <h1 id="song-heading" className="song-page-title" lang="zh">{songInfo.orig_title}</h1>
+                    {songInfo.eng_title && <p className="song-page-alt-title" lang="en">({songInfo.eng_title})</p>}
+                    <p className="song-page-artist">{songInfo.artist_eng_name}</p>
                 </div>
 
                 <fieldset className="settings-bar">
@@ -237,7 +297,7 @@ export default function SongPage() {
                             lyrics={songLyrics} 
                             showPronunciation={showPronunciation} 
                             simplifiedCharacters={simplifiedCharacters} 
-                            origScript={song_info.orig_script} 
+                            origScript={songInfo.orig_script} 
                             onLookup={handleLookup} />
                     </>
                 )}
@@ -255,10 +315,10 @@ export default function SongPage() {
             <div>
                 <MusicPlayer 
                     player={youtube} 
-                    artist={song_info.artist} 
-                    img={song_info.img} 
-                    title={song_info.title} 
-                    ytVideoId={ytVideoId || song_info.yt_url}
+                    artist={songInfo.artist_eng_name}
+                    img={songInfo.cover_url}
+                    title={songInfo.orig_title}
+                    ytVideoId={ytVideoId || songInfo.yt_url}
                     onPreviousLyric={handlePreviousLyric}
                     onNextLyric={handleNextLyric}
                     canSeekLyrics={hasTimestamps}
