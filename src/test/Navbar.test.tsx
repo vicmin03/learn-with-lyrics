@@ -27,6 +27,38 @@ describe('Navbar', () => {
         expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
     });
 
+    test('opens the login form when the Log In button is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <MemoryRouter>
+                <Navbar />
+            </MemoryRouter>
+        );
+
+        expect(screen.queryByRole('heading', { name: 'Log In' })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Log In' }));
+
+        expect(await screen.findByRole('heading', { name: 'Log In' })).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Enter your email address')).toBeInTheDocument();
+    });
+
+    test('opens the sign-up form when the Sign Up button is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <MemoryRouter>
+                <Navbar />
+            </MemoryRouter>
+        );
+
+        expect(screen.queryByRole('heading', { name: 'Sign Up' })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+        expect(await screen.findByRole('heading', { name: 'Sign Up' })).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Confirm your password')).toBeInTheDocument();
+    });
+
     test('opens the language menu with its options', async () => {
         const user = userEvent.setup();
         render(

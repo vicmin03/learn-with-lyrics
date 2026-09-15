@@ -3,8 +3,8 @@ import { useState, useId } from "react";
 import { IoSearch, IoChevronDown } from "react-icons/io5";
 import { Menu, Button, IconButton, MenuItem } from "@mui/material";
 import { Link } from 'react-router-dom';
-import { LogInForm } from "../LogInForm/LogInForm";
-import { SignUpForm } from "../SignUpForm/SignUpForm";
+import { LogInForm } from "../Forms/LogInForm";
+import { SignUpForm } from "../Forms/SignUpForm";
 
 
 export default function Navbar() {

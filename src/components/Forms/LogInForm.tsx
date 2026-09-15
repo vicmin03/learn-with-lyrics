@@ -1,4 +1,4 @@
-import "./LogInForm.css";
+import "./Form.css";
 import * as z from "zod";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Input, DialogContentText, CircularProgress } from "@mui/material";
 import { useForm } from "react-hook-form";
