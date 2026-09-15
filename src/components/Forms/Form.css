@@ -1,0 +1,124 @@
+:root {
+    --form-surface: #f2f3f4;
+    --form-input-surface: #ffffff;
+}
+
+.dialog .MuiDialog-paper {
+    border-radius: 8px;
+    background-color: var(--form-surface) !important;
+    box-shadow: var(--shadow);
+    color-scheme: light;
+}
+
+.dialog .MuiDialogTitle-root,
+.dialog .MuiDialogContent-root,
+.dialog .MuiDialogActions-root {
+    background-color: var(--form-surface);
+}
+
+.dialog .MuiBackdrop-root {
+    background-color: rgba(32, 32, 30, 0.55);
+}
+
+.dialog .MuiDialogTitle-root {
+    padding: 1.5rem 2rem 0.5rem;
+    text-align: center;
+    color: var(--text-h);
+    font-weight: 700;
+}
+
+.dialog .MuiDialogContent-root {
+    padding: 0.5rem 2rem 1rem;
+}
+
+.dialog .MuiDialogContentText-root {
+    max-width: 34rem;
+    margin: 0 auto;
+    text-align: center;
+    color: var(--text);
+}
+
+.log-in-form {
+    padding: 1rem 0;
+}
+
+.form-input-line {
+    padding: 0.5rem 0;
+}
+
+.form-input-line > p:not(.error-msg-text) {
+    margin-bottom: 0.35rem;
+    color: var(--text-h);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.form-input-line .MuiOutlinedInput-root {
+    background: var(--form-input-surface);
+    border-radius: 8px;
+}
+
+.form-input-line .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--accent-border);
+}
+
+.form-input-line .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--accent);
+    border-width: 2px;
+}
+
+.MuiInputBase-input {
+    background-color: #ffffff;
+}
+
+.form-buttons {
+    width: 95%;
+    padding: 0 2rem 1.5rem;
+    box-sizing: border-box;
+    align-self: center;
+}
+
+.submit-button.MuiButton-root {
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-radius: 8px;
+    background-color: var(--accent);
+    color: white;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.submit-button.MuiButton-root:hover {
+    background-color: var(--accent-border);
+    box-shadow: 0 4px 10px rgba(115, 12, 7, 0.2);
+}
+
+.sign-up-prompt {
+    padding: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+}
+
+.form-footer {
+    padding: 1rem;
+    justify-items: center;
+    line-height: 2rem;
+}
+
+@media (max-width: 600px) {
+    .dialog .MuiDialogTitle-root,
+    .dialog .MuiDialogContent-root {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    .form-buttons {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
