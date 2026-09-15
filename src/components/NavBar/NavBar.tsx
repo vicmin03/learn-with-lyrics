@@ -9,7 +9,7 @@ import { useAuth } from "../../auth/AuthContext";
 
 
 export default function Navbar() {
-    const { session, signOut, user, isAdmin } = useAuth();
+    const { session, signOut, isAdmin } = useAuth();
 
     // for languages menu, which opens from anchor element button
     const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
