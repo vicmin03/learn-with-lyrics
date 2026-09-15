@@ -1,8 +1,11 @@
+import "./NavBar.css";
 import { useState, useId } from "react";
 import { IoSearch, IoChevronDown } from "react-icons/io5";
 import { Menu, Button, IconButton, MenuItem } from "@mui/material";
 import { Link } from 'react-router-dom';
-import "./NavBar.css";
+import { LogInForm } from "../LogInForm/LogInForm";
+import { SignUpForm } from "../SignUpForm/SignUpForm";
+
 
 export default function Navbar() {
     // for languages menu, which opens from anchor element button
@@ -19,6 +22,18 @@ export default function Navbar() {
 
     const handleClose = () => {
         setAnchorElement(null);
+    }
+
+    // open login form
+    const [openLogin, setOpenLogin] = useState(false);
+    const handleLogIn = () => {
+        setOpenLogin(true);
+    }
+
+    // open signup form
+    const [openSignUp, setOpenSignUp] = useState(false);
+    const handleSignUp = () => {
+        setOpenSignUp(true);
     }
 
     return (
@@ -67,7 +82,23 @@ export default function Navbar() {
                 />
             </IconButton>
 
+            <div className="auth-button-container">
+                <Button
+                    className="nav-button"
+                    onClick={handleLogIn}>
+                    Log In
+                </Button>
 
+                {openLogin && <LogInForm open={openLogin} setOpen={setOpenLogin}  />}
+
+                <Button
+                    className="nav-button"
+                    onClick={handleSignUp}>
+                    Sign Up
+                </Button>
+
+                {openSignUp && <SignUpForm open={openSignUp} setOpen={setOpenSignUp}  />}
+            </div>
 
         </nav>
     )
