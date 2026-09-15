@@ -5,9 +5,12 @@ import { Menu, Button, IconButton, MenuItem } from "@mui/material";
 import { Link } from 'react-router-dom';
 import { LogInForm } from "../Forms/LogInForm";
 import { SignUpForm } from "../Forms/SignUpForm";
+import { useAuth } from "../../auth/AuthContext";
 
 
 export default function Navbar() {
+    const { session, signOut, user, isAdmin } = useAuth();
+
     // for languages menu, which opens from anchor element button
     const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorElement);
@@ -74,6 +77,10 @@ export default function Navbar() {
                     <MenuItem className="language-menu-item" value="Korean">Korean</MenuItem>
                 </Menu>
             </div>
+
+            <div>
+                {isAdmin && <Button>Add Song</Button>}
+            </div>
             
 
             <IconButton className="navbar-search-icon" aria-label="Search">
@@ -82,22 +89,34 @@ export default function Navbar() {
                 />
             </IconButton>
 
+            
             <div className="auth-button-container">
-                <Button
-                    className="nav-button"
-                    onClick={handleLogIn}>
-                    Log In
-                </Button>
+                { session ? ( 
+                    <Button
+                        className="nav-button"
+                        onClick={signOut}>
+                        Sign Out
+                    </Button>
+                    ) : (
+                    <>
+                        <Button
+                            className="nav-button"
+                            onClick={handleLogIn}>
+                            Log In
+                        </Button>
 
-                {openLogin && <LogInForm open={openLogin} setOpen={setOpenLogin}  />}
+                        {openLogin && <LogInForm open={openLogin} setOpen={setOpenLogin}  />}
 
-                <Button
-                    className="nav-button"
-                    onClick={handleSignUp}>
-                    Sign Up
-                </Button>
+                        <Button
+                            className="nav-button"
+                            onClick={handleSignUp}>
+                            Sign Up
+                        </Button>
 
-                {openSignUp && <SignUpForm open={openSignUp} setOpen={setOpenSignUp}  />}
+                        {openSignUp && <SignUpForm open={openSignUp} setOpen={setOpenSignUp}  />}
+                    </>
+                    )   
+                }
             </div>
 
         </nav>

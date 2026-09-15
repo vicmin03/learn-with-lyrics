@@ -4,6 +4,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Input, Dialo
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorText } from "../ErrorText/ErrorText";
+import { supabase } from "../../lib/supabaseClient";
 
 interface LogInProps {
     open: boolean,
@@ -28,9 +29,20 @@ export function LogInForm ({open, setOpen}: LogInProps ) {
         setOpen(false);
     };
 
-    const submitForm = (data: LogInValues) => {
-        console.log("GONNA SUBMIT NOW");
-        console.log(data);
+    const submitForm = async (data: LogInValues) => {
+        
+        console.log("LOGGING IN WITH", data);
+        
+        const result = await supabase?.auth.signInWithPassword({
+            email: data.email, password: data.password
+        });
+        if (result?.error) {
+            console.error("Error logging in:", result.error.message)
+        }
+        else {
+            handleClose();
+        }
+        
     }
 
     return (

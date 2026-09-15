@@ -5,6 +5,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorText } from "../ErrorText/ErrorText";
+import { supabase } from "../../lib/supabaseClient";
 
 interface SignInProps {
     open: boolean,
@@ -39,9 +40,17 @@ export function SignUpForm ({open, setOpen}: SignInProps) {
         setOpen(false);
     };
 
-    const submitForm = (data: SignUpValues) => {
-        console.log("GONNA SIGN UP NOW");
-        console.log(data);
+    const submitForm = async (data: SignUpValues) => {
+        console.log("SIGNING UP WITH", data);
+        const result = await supabase?.auth.signUp({email: data.email, password: data.password})
+
+        if (result?.error) {
+            console.error("Error signing up:", result.error.message)
+        }
+
+        else{
+            handleClose();
+        }
     }
 
     return (
