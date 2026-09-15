@@ -41,7 +41,6 @@ export function SignUpForm ({open, setOpen}: SignInProps) {
     };
 
     const submitForm = async (data: SignUpValues) => {
-        console.log("SIGNING UP WITH", data);
         const result = await supabase?.auth.signUp({email: data.email, password: data.password})
 
         if (result?.error) {

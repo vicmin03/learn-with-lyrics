@@ -30,9 +30,6 @@ export function LogInForm ({open, setOpen}: LogInProps ) {
     };
 
     const submitForm = async (data: LogInValues) => {
-        
-        console.log("LOGGING IN WITH", data);
-        
         const result = await supabase?.auth.signInWithPassword({
             email: data.email, password: data.password
         });

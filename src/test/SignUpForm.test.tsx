@@ -3,12 +3,22 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SignUpForm } from '../components/Forms/SignUpForm';
 
+const { signUp } = vi.hoisted(() => ({
+	signUp: vi.fn().mockResolvedValue({ error: null }),
+}));
+
+vi.mock('../lib/supabaseClient', () => ({
+	supabase: {
+		auth: { signUp },
+	},
+}));
+
 describe('SignUpForm', () => {
 	const renderForm = () =>
 		render(<SignUpForm open={true} setOpen={vi.fn()} />);
 
 	afterEach(() => {
-		vi.restoreAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('renders all sign-up fields and the submit button', () => {
@@ -54,8 +64,8 @@ describe('SignUpForm', () => {
 
 	test('submits valid sign-up details', async () => {
 		const user = userEvent.setup();
-		const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-		renderForm();
+		const setOpen = vi.fn();
+		render(<SignUpForm open={true} setOpen={setOpen} />);
 
 		await user.type(screen.getByPlaceholderText('Enter your email address'), 'learner@example.com');
 		await user.type(screen.getByPlaceholderText('Confirm your email address'), 'learner@example.com');
@@ -63,12 +73,11 @@ describe('SignUpForm', () => {
 		await user.type(screen.getByPlaceholderText('Confirm your password'), 'correct-password');
 		await user.click(screen.getByRole('button', { name: 'Sign Up' }));
 
-		expect(consoleLog).toHaveBeenCalledWith({
+		expect(signUp).toHaveBeenCalledWith({
 			email: 'learner@example.com',
-			confirmEmail: 'learner@example.com',
 			password: 'correct-password',
-			confirmPassword: 'correct-password',
 		});
+		expect(setOpen).toHaveBeenCalledWith(false);
 	});
 });
 
