@@ -46,7 +46,7 @@
     padding: 0.5rem 0;
 }
 
-.form-input-line p {
+.form-input-line > p:not(.error-msg-text) {
     margin-bottom: 0.35rem;
     color: var(--text-h);
     font-size: 0.9rem;
