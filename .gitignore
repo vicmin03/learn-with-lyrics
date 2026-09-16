@@ -56,3 +56,8 @@ dist-ssr
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# images
+*.jpeg
+*.png
+*.jpg

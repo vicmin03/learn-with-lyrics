@@ -1,9 +1,8 @@
 import "./Form.css";
 import * as z from "zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Input, DialogContentText, CircularProgress } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText, CircularProgress } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ErrorText } from "../ErrorText/ErrorText";
 import { supabase } from "../../lib/supabaseClient";
 import { FormInputLine } from "../FormInputLine";
 

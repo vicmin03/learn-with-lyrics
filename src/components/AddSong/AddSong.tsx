@@ -1,67 +1,15 @@
 import "./AddSong.css";
 import { useState, useEffect } from "react";
-import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from "react-hook-form";
-import { scripts, languageCodes } from "../../types/languageCodes";
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { ErrorText } from "../ErrorText/ErrorText";
 import { FormInputLine } from "../FormInputLine";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { supabase } from "../../lib/supabaseClient";
-
-// format correctly for select options
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
-export const languageOptions: SelectOption[] = Object.entries(languageCodes).map(
-  ([label, value]) => ({
-    label,
-    value,
-  })
-);
-
-export const scriptOptions: SelectOption[] = Object.entries(scripts).map(
-    ([value, label]) => ({
-    value,
-        label,
-  })
-);
-
-// define fields of the add song form
-const addSongValuesSchema = z.object({
-    // artist_id: z.number(),
-    artist_name: z.string().nonempty(),
-    artist_eng_name: z.string().nonempty(),
-    orig_title: z.string().nonempty(),
-    eng_title: z.string(),
-    language: z.string().nonempty(),
-    script: z.string().length(2),
-    album: z.string(),
-    yt_id: z.string().length(11)
-}).refine((data) => Object.keys(scripts).includes(data.script), {
-        message: "Please choose a supported script",
-        path: ["script"]
-}).refine((data) => Object.keys(languageCodes).includes(data.language), {
-    message: "Please choose a supported language",
-    path: ["language"]
-});
-
-type AddSongValues = z.infer<typeof addSongValuesSchema>
-
-type Artist = {
-  artist_id: number;
-  artist_name: string;
-  artist_eng_name: string | null;
-};
-
-type SubmissionStatus = {
-    type: "loading" | "success" | "error";
-    message: string;
-};
+import { FiUpload } from "react-icons/fi";
+import { addSongValuesSchema, AddSongValues, Artist, SelectOption, languageOptions, scriptOptions, SubmissionStatus } from "./helpers";
 
 
 export function AddSong() {
@@ -78,6 +26,10 @@ export function AddSong() {
     // track artistId of an existing artist if selected
     const [currentArtistId, setCurrentArtistId] = useState<number | null>(null);
     const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus | null>(null);
+
+    // for uploading cover image
+    const [coverImage, setCoverImage] = useState<File | null>(null);
+    const [coverInputKey, setCoverInputKey] = useState(0);
 
     useEffect(() => {
         const getArtists = async() => {
@@ -121,12 +73,12 @@ export function AddSong() {
         return null;
     }
 
-    const createSong = async (data: AddSongValues, artist_id: number) => {
+    const createSong = async (data: AddSongValues, artist_id: number, cover_url: string | null) => {
         const result = await supabase?.from("Songs").insert({
             orig_title: data.orig_title,
             eng_title: data.eng_title, 
             artist_id: artist_id,
-            // cover_url: data.cover_url,
+            cover_url,
             language: data.language, 
             orig_script: data.script, 
             yt_id: data.yt_id,
@@ -141,6 +93,28 @@ export function AddSong() {
         return true;
     }
 
+    // upload image to supabase storage in bucket song-covers
+    const uploadImage = async (file: File) : Promise<string | null> => {
+        if (!supabase) {
+            return null;
+        }
+
+        const fileName = `${file.name}-${file.lastModified}-${file.size}`
+
+        const result = await supabase?.storage.from("song-covers").upload(fileName, file);
+
+        if (result?.error) {
+            console.error("Error uploading image: ", result.error.message);
+            return null;
+        }
+
+        const { data } = await supabase.storage.from("song-covers").getPublicUrl(fileName);
+        
+        return data.publicUrl;
+
+    }
+
+    // upload new (artist and) song, including uploading cover image to supabase storage and retrieving correct url for image
     const submitForm = async (data: AddSongValues) => {
         setSubmissionStatus({ type: "loading", message: "Adding song..." });
         let artistId = currentArtistId;
@@ -155,8 +129,18 @@ export function AddSong() {
             return;
         }
 
+        // upload cover image to supabase storage
+        let imageUrl: string | null = null;
+        if (coverImage) {
+            imageUrl = await uploadImage(coverImage);
+            if (imageUrl === null) {
+                setSubmissionStatus({ type: "error", message: "The cover image could not be uploaded. Please try again." });
+                return;
+            }
+        }
+
         // create song with the selected or newly created artist id
-        const songCreated = await createSong(data, artistId);
+        const songCreated = await createSong(data, artistId, imageUrl);
         if (!songCreated) {
             setSubmissionStatus({ type: "error", message: "The song could not be created. Please try again." });
             return;
@@ -166,8 +150,17 @@ export function AddSong() {
         reset();
         setCurrentArtistId(null);
         setIsArtistEnglishNameDisabled(false);
+        setCoverImage(null);
+        setCoverInputKey((key) => key + 1);
         setSubmissionStatus({ type: "success", message: successMessage });
         console.log("ADDED NEW SONG", data);
+    }
+
+    // handle uploading images
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setCoverImage(e.target.files[0])
+        }
     }
 
     return (
@@ -301,6 +294,29 @@ export function AddSong() {
                     placeholder="Select correct audio or enter YouTube video id"
                     disabled={isSubmitting}
                 />
+                <div className="form-select-container">
+                    <p className="form-label">Cover Image</p>
+                    <div className="file-input-wrapper">
+                        <input 
+                            className="file-input"
+                            id="cover-image-input"
+                            key={coverInputKey} 
+                            type="file"
+                            accept="image/*" 
+                            onChange={handleFileChange}
+                            disabled={isSubmitting}
+                        />
+                        <label className="file-input-label" htmlFor="cover-image-input">
+                            <span className={!coverImage ? "file-input-placeholder" : undefined}>
+                                {coverImage?.name ?? "Choose cover image"}
+                            </span>
+                            <FiUpload className="file-input-icon" aria-hidden="true" />
+                        </label>
+                    </div>
+                </div>
+           
+                
+                
             </form>
             <Button
                 className="submit-button"
