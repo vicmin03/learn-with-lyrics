@@ -1,4 +1,5 @@
 import "./AddSong.css";
+import { useState, useEffect } from "react";
 import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from "react-hook-form";
@@ -7,6 +8,8 @@ import { Button } from "@mui/material";
 import { ErrorText } from "../ErrorText/ErrorText";
 import { FormInputLine } from "../FormInputLine";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
+import { supabase } from "../../lib/supabaseClient";
 
 // format correctly for select options
 type SelectOption = {
@@ -30,6 +33,7 @@ export const scriptOptions: SelectOption[] = Object.entries(scripts).map(
 
 // define fields of the add song form
 const addSongValuesSchema = z.object({
+    // artist_id: z.number(),
     artist_name: z.string().nonempty(),
     artist_eng_name: z.string(),
     orig_title: z.string().nonempty(),
@@ -48,10 +52,45 @@ const addSongValuesSchema = z.object({
 
 type AddSongValues = z.infer<typeof addSongValuesSchema>
 
+type Artist = {
+  artist_id: string;
+  artist_name: string;
+  artist_eng_name: string | null;
+};
+
+
 export function AddSong() {
     const { register, control, handleSubmit, setValue, watch, formState: { errors, isSubmitting }} = useForm<AddSongValues>({
         resolver: zodResolver(addSongValuesSchema)
     })
+
+
+    // load artist names from supabase table for select 
+    const [artistOptions, setArtistOptions] = useState<SelectOption[]>([]);
+    const [artists, setArtists] = useState<Artist[]>([]);
+
+    useEffect(() => {
+        const getArtists = async() => {
+            const result = await supabase?.from("Artists").select("artist_id, artist_name, artist_eng_name")
+
+            if (result?.error) { 
+                console.error('Failed to load artists:', result.error); 
+                return; 
+            }
+
+            if (result?.data) {
+                const options = result.data.map((artist) => ({
+                    value: artist.artist_id, 
+                    label: artist.artist_name
+                }))
+                setArtistOptions(options);
+                setArtists(result.data);
+            }
+        }
+
+        getArtists();
+
+    }, [])
 
     const submitForm = (data: AddSongValues) => {
         console.log(data);
@@ -62,12 +101,42 @@ export function AddSong() {
             <h1>Add new song</h1>
 
             <form className="add-song-form" onSubmit={handleSubmit(submitForm)} id="add-song-form">
-                <FormInputLine 
+                {/* <FormInputLine 
                     register={register} 
                     errors={errors}
                     label="Artist Name" 
                     field="artist_name" 
                     placeholder="Enter artist name (in original language)"
+                /> */}
+                <Controller
+                    name="artist_name"
+                    control={control}
+                    render={({field}) => (
+                        <>
+                            <CreatableSelect 
+                                className="form-select" 
+                                isClearable
+                                options={artistOptions}
+                                value={artistOptions.find( (option) => option.label === field.value ) ?? (field.value ? { value: field.value, label: field.value } : null)}
+                                onChange={(option) => {
+                                    if (!option) {
+                                        field.onChange('');
+                                        setValue('artist_eng_name', '');
+                                        return;
+                                    }
+                                    // find existing artist's english name 
+                                    const artist = artists.find(
+                                        (artist) => artist.artist_name === option.label
+                                    );
+                                    field.onChange(option.label);
+                                    setValue("artist_eng_name", artist?.artist_eng_name ?? "");
+                                }}     
+                                placeholder="Select an artist"
+                                onBlur={field.onBlur}     
+                            />
+                             <ErrorText msg={errors.artist_name?.message}/>
+                        </>
+                    )}
                 />
                 <FormInputLine 
                     register={register} 
