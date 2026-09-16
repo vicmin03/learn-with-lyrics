@@ -6,7 +6,7 @@ export interface Song {
     cover_url: string,
     language: string, 
     orig_script: string, 
-    yt_url: string,
+    yt_id: string,
     album: string,
     artist_name: string,
     artist_eng_name: string

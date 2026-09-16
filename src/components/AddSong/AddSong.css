@@ -21,6 +21,42 @@
     text-align: left;
 }
 
+.form-select .form-select__control,
+.form-select .form-select__control--is-focused {
+    border: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.form-select .form-select__control:hover {
+    border: 0;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.87);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.form-select .form-select__control--is-focused {
+    border-bottom: 2px solid #1976d2;
+}
+
+.form-label {
+    margin-bottom: 0.35rem;
+    color: var(--text-h);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.form-select .form-select__control--is-focused:hover {
+    border-bottom: 2px solid #1976d2;
+}
+
+.form-select .form-select__control--is-disabled {
+    border-bottom-color: rgba(0, 0, 0, 0.38);
+    box-shadow: none;
+}
+
 @media (max-width: 600px) {
     .add-song-form {
         grid-template-columns: 1fr;

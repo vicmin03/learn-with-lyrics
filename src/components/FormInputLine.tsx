@@ -9,9 +9,10 @@ interface FormInputLineProps<T extends FieldValues> {
     field: Path<T>,
     type?: string,
     placeholder: string,
+    disabled?: boolean,
 }
 
-export function FormInputLine<T extends FieldValues>({register, errors, label, field, type, placeholder}: FormInputLineProps<T>) {
+export function FormInputLine<T extends FieldValues>({register, errors, label, field, type, placeholder, disabled}: FormInputLineProps<T>) {
     const errorMessage = errors[field]?.message;
 
     return (
@@ -23,6 +24,7 @@ export function FormInputLine<T extends FieldValues>({register, errors, label, f
                 id={`${field}-input`}
                 placeholder={placeholder}
                 type={type || 'text'} 
+                disabled={disabled}
             />
             <ErrorText msg={typeof errorMessage === "string" ? errorMessage : undefined}/>
         </div>
