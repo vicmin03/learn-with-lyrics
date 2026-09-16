@@ -4,7 +4,7 @@ import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from "react-hook-form";
 import { scripts, languageCodes } from "../../types/languageCodes";
-import { Button } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { ErrorText } from "../ErrorText/ErrorText";
 import { FormInputLine } from "../FormInputLine";
 import Select from "react-select";
@@ -58,9 +58,14 @@ type Artist = {
   artist_eng_name: string | null;
 };
 
+type SubmissionStatus = {
+    type: "loading" | "success" | "error";
+    message: string;
+};
+
 
 export function AddSong() {
-    const { register, control, handleSubmit, setValue, watch, formState: { errors, isSubmitting }} = useForm<AddSongValues>({
+    const { register, control, handleSubmit, setValue, reset, formState: { errors, isSubmitting }} = useForm<AddSongValues>({
         resolver: zodResolver(addSongValuesSchema)
     })
 
@@ -72,6 +77,7 @@ export function AddSong() {
 
     // track artistId of an existing artist if selected
     const [currentArtistId, setCurrentArtistId] = useState<number | null>(null);
+    const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus | null>(null);
 
     useEffect(() => {
         const getArtists = async() => {
@@ -126,9 +132,17 @@ export function AddSong() {
             yt_id: data.yt_id,
             album: data.album,
         });
+
+        if (result?.error) {
+            console.error('Failed to create song:', result.error);
+            return false;
+        }
+
+        return true;
     }
 
     const submitForm = async (data: AddSongValues) => {
+        setSubmissionStatus({ type: "loading", message: "Adding song..." });
         let artistId = currentArtistId;
 
         // if new artist, add them first and retrieve artist id
@@ -137,12 +151,22 @@ export function AddSong() {
         }
 
         if (artistId === null) {
+            setSubmissionStatus({ type: "error", message: "The artist could not be created. Please try again." });
             return;
         }
 
         // create song with the selected or newly created artist id
-        await createSong(data, artistId);
+        const songCreated = await createSong(data, artistId);
+        if (!songCreated) {
+            setSubmissionStatus({ type: "error", message: "The song could not be created. Please try again." });
+            return;
+        }
 
+        const successMessage = `The song "${data.orig_title} - ${data.artist_name}" was added successfully.`;
+        reset();
+        setCurrentArtistId(null);
+        setIsArtistEnglishNameDisabled(false);
+        setSubmissionStatus({ type: "success", message: successMessage });
         console.log("ADDED NEW SONG", data);
     }
 
@@ -161,6 +185,7 @@ export function AddSong() {
                                 <CreatableSelect 
                                     className="form-select" 
                                     classNamePrefix="form-select"
+                                    isDisabled={isSubmitting}
                                     isClearable
                                     options={artistOptions}
                                     value={artistOptions.find( (option) => option.label === field.value ) ?? (field.value ? { value: field.value, label: field.value } : null)}
@@ -195,7 +220,7 @@ export function AddSong() {
                     label="Artist Name - English" 
                     field="artist_eng_name" 
                     placeholder="Enter artist name (in English)"
-                    disabled={isArtistEnglishNameDisabled}
+                    disabled={isSubmitting || isArtistEnglishNameDisabled}
                 />
                 <FormInputLine 
                     register={register} 
@@ -203,6 +228,7 @@ export function AddSong() {
                     label="Song Title" 
                     field="orig_title" 
                     placeholder="Enter song title (in original language)"
+                    disabled={isSubmitting}
                 />
                 <FormInputLine 
                     register={register} 
@@ -210,6 +236,7 @@ export function AddSong() {
                     label="Song Title - English (optional)" 
                     field="eng_title" 
                     placeholder="Enter song title (in English)"
+                    disabled={isSubmitting}
                 />
                 <div className="form-select-container">
                     <p className="form-label">Language</p>
@@ -222,6 +249,7 @@ export function AddSong() {
                                 <Select 
                                     className="form-select" 
                                     classNamePrefix="form-select"
+                                    isDisabled={isSubmitting}
                                     options={languageOptions}
                                     value={ languageOptions.find( (option) => option.label === field.value ) ?? null } 
                                     onChange={(option) => { field.onChange(option?.label ?? ''); }}
@@ -244,6 +272,7 @@ export function AddSong() {
                                 <Select 
                                     className="form-select" 
                                     classNamePrefix="form-select"
+                                    isDisabled={isSubmitting}
                                     options={scriptOptions} 
                                     value={ scriptOptions.find( (option) => option.value === field.value ) ?? null }
                                     // convert from label back to value (e.g. Simplified -> ch)
@@ -262,6 +291,7 @@ export function AddSong() {
                     label="Album (optional)" 
                     field="album" 
                     placeholder="Enter name of album"
+                    disabled={isSubmitting}
                 />
                 <FormInputLine 
                     register={register} 
@@ -269,15 +299,43 @@ export function AddSong() {
                     label="Youtube Video ID" 
                     field="yt_id" 
                     placeholder="Select correct audio or enter YouTube video id"
+                    disabled={isSubmitting}
                 />
             </form>
             <Button
                 className="submit-button"
                 type="submit"
                 loading={isSubmitting}
+                loadingIndicator={
+                <CircularProgress
+                    size={20}
+                    sx={{ color: "white" }}
+                    />
+                }
                 form="add-song-form">
                 Add New Song
             </Button>
+            <Dialog
+                className="dialog"
+                open={submissionStatus !== null}
+                onClose={() => {
+                    if (!isSubmitting) {
+                        setSubmissionStatus(null);
+                    }
+                }}
+            >
+                <DialogTitle>
+                    {submissionStatus?.type === "success" ? "Song added" : submissionStatus?.type === "error" ? "Song not added" : "Adding song"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{submissionStatus?.message}</DialogContentText>
+                </DialogContent>
+                {!isSubmitting && (
+                    <DialogActions>
+                        <Button onClick={() => setSubmissionStatus(null)}>Close</Button>
+                    </DialogActions>
+                )}
+            </Dialog>
         </>
     )
 }

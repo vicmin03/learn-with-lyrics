@@ -3,6 +3,7 @@ import "./Form.css";
 import { Input, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
+import {CircularProgress} from "@mui/material";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorText } from "../ErrorText/ErrorText";
 import { supabase } from "../../lib/supabaseClient";
@@ -104,6 +105,12 @@ export function SignUpForm ({open, setOpen}: SignInProps) {
                         className="submit-button"
                         type="submit"
                         loading={isSubmitting}
+                        loadingIndicator={
+                            <CircularProgress
+                                size={20}
+                                sx={{ color: "white" }}
+                                />
+                            }
                         form="sign-up-form">
                         Sign Up
                     </Button>
