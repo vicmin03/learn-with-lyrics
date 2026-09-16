@@ -1,0 +1,114 @@
+.add-song-form {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2rem;
+}
+
+.form-input-line,
+.form-select-container {
+    min-width: 0;
+}
+
+.form-input-line p,
+.form-select-container p {
+    margin: 0 0 0.5rem;
+    text-align: left;
+}
+
+.form-select {
+    width: 100%;
+    text-align: left;
+}
+
+.form-input-line input::placeholder,
+.form-select .form-select__placeholder,
+.file-input-placeholder {
+    color: var(--placeholder);
+    opacity: 1;
+}
+
+.form-select .form-select__control,
+.form-select .form-select__control--is-focused {
+    border: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.form-select .form-select__control:hover {
+    border: 0;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.87);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.form-select .form-select__control--is-focused {
+    border-bottom: 2px solid #1976d2;
+}
+
+.form-label {
+    margin-bottom: 0.35rem;
+    color: var(--text-h);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.form-select .form-select__control--is-focused:hover {
+    border-bottom: 2px solid #1976d2;
+}
+
+.form-select .form-select__control--is-disabled {
+    border-bottom-color: rgba(0, 0, 0, 0.38);
+    box-shadow: none;
+}
+
+@media (max-width: 600px) {
+    .add-song-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.file-input-label {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+}
+
+.file-input-label:hover {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.87);
+}
+
+.file-input:focus-visible + .file-input-label {
+    border-bottom: 2px solid #1976d2;
+}
+
+.file-input:disabled + .file-input-label {
+    border-bottom-color: rgba(0, 0, 0, 0.38);
+    color: rgba(0, 0, 0, 0.38);
+    cursor: default;
+}
+
+.file-input-icon {
+    margin-left: auto;
+}

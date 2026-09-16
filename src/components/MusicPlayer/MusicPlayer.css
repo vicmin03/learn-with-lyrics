@@ -21,6 +21,9 @@
 
 .song-cover-img {
     width: 5rem;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     border-radius: 1rem;
 }
 

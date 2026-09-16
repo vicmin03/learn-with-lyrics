@@ -118,7 +118,7 @@ export default function SongPage() {
             }
         }
 
-        if (!songInfo?.yt_url) {
+        if (!songInfo?.yt_id) {
             fetchURL();
             // TODO: save newly fetched url to database for quicker retrieval next time
         }
@@ -318,7 +318,7 @@ export default function SongPage() {
                     artist={songInfo.artist_eng_name}
                     img={songInfo.cover_url}
                     title={songInfo.orig_title}
-                    ytVideoId={ytVideoId || songInfo.yt_url}
+                    ytVideoId={ytVideoId || songInfo.yt_id}
                     onPreviousLyric={handlePreviousLyric}
                     onNextLyric={handleNextLyric}
                     canSeekLyrics={hasTimestamps}

@@ -1,4 +1,5 @@
 .error-msg-text {
     font-size: small;
     color: red;
+    justify-self: left;
 }

@@ -1,10 +1,10 @@
 import "./Form.css";
 import * as z from "zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Input, DialogContentText, CircularProgress } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText, CircularProgress } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ErrorText } from "../ErrorText/ErrorText";
 import { supabase } from "../../lib/supabaseClient";
+import { FormInputLine } from "../FormInputLine";
 
 interface LogInProps {
     open: boolean,
@@ -55,25 +55,21 @@ export function LogInForm ({open, setOpen}: LogInProps ) {
                         Sign in to your account
                     </DialogContentText>
                     <form className="log-in-form" onSubmit={handleSubmit(submitForm)} id="log-in-form">
-                        <div className="form-input-line">
-                            <p>Email</p>
-                            <Input 
-                                {...register("email")}
-                                fullWidth
-                                id="email-input"
-                                placeholder="Enter your email address"
-                            />
-                            <ErrorText msg={errors.email?.message}/>
-                        </div>
-                        <div className="form-input-line">
-                            <p>Password</p>
-                            <Input 
-                                {...register("password")}
-                                fullWidth
-                                placeholder="Enter your password"
-                                type="password"/>
-                            <ErrorText msg={errors.password?.message}/>
-                        </div>
+                        <FormInputLine 
+                            register={register} 
+                            errors={errors}
+                            label="Email" 
+                            field="email" 
+                            placeholder="Enter your email address"
+                        />
+                        <FormInputLine 
+                            register={register} 
+                            errors={errors}
+                            label="Password" 
+                            field="password" 
+                            placeholder="Enter your password"
+                            type="password"
+                        />
                     </form>
                 </DialogContent>
                 <DialogActions className="form-buttons">

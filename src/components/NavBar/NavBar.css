@@ -65,3 +65,7 @@
     font-weight: bold;
     font-family: var(--sans);
 }
+
+.add-song-button {
+  margin: 0 1rem;
+}

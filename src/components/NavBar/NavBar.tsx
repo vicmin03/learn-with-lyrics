@@ -78,8 +78,11 @@ export default function Navbar() {
                 </Menu>
             </div>
 
-            <div>
-                {isAdmin && <Button>Add Song</Button>}
+            <div className="add-song-button">    
+                {isAdmin && 
+                    <Link to={"/add_song"}>
+                        <Button className="menu-button">Add Song</Button>
+                    </Link>}
             </div>
             
 
