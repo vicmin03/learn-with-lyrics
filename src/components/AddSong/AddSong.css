@@ -1,0 +1,28 @@
+.add-song-form {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2rem;
+}
+
+.form-input-line,
+.form-select-container {
+    min-width: 0;
+}
+
+.form-input-line p,
+.form-select-container p {
+    margin: 0 0 0.5rem;
+    text-align: left;
+}
+
+.form-select {
+    width: 100%;
+    text-align: left;
+}
+
+@media (max-width: 600px) {
+    .add-song-form {
+        grid-template-columns: 1fr;
+    }
+}

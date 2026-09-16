@@ -28,7 +28,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
 
               <Route element={<AdminRoute />}>
-                <Route path="/admin/add_song" element={<AddSong />}/>
+                <Route path="/add_song" element={<AddSong />}/>
               </Route>
           </Routes>
         </BrowserRouter>
