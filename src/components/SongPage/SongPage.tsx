@@ -33,6 +33,8 @@ export default function SongPage() {
 
     // manages state for music player
     const [ytVideoId, setYtVideoId] = useState("");
+    const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+    const [youtubeError, setYoutubeError] = useState<string | null>(null);
 
     useEffect(() => {
         const getSongInfo = async() => {
@@ -100,28 +102,49 @@ export default function SongPage() {
     }
 
     // fetch youtube url to display video embed on initial render
-    useEffect( () => {
+    useEffect(() => {
         let isCancelled = false;
 
-        async function fetchURL() {
+        async function initializeYoutube() {
             if (!songInfo) {
                 return;
             }
 
+            setYtVideoId("");
+            setYoutubeError(null);
+
+            if (songInfo.yt_id) {
+                setYtVideoId(songInfo.yt_id);
+                setIsYoutubeLoading(false);
+                return;
+            }
+
+            setIsYoutubeLoading(true);
+
             try {
                 const videoId = await fetchVideoId(songInfo.artist_eng_name, songInfo.orig_title);
-                if (!isCancelled && videoId) {
+                if (isCancelled) {
+                    return;
+                }
+
+                if (videoId) {
                     setYtVideoId(videoId);
+                } else {
+                    setYoutubeError('A YouTube video could not be found for this song.');
                 }
             } catch (error) {
                 console.error('Failed to fetch YouTube video', error);
+                if (!isCancelled) {
+                    setYoutubeError('Unable to load the YouTube video right now.');
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsYoutubeLoading(false);
+                }
             }
         }
 
-        if (!songInfo?.yt_id) {
-            fetchURL();
-            // TODO: save newly fetched url to database for quicker retrieval next time
-        }
+        initializeYoutube();
 
         return () => {
             isCancelled = true;
@@ -151,6 +174,7 @@ export default function SongPage() {
                 }, controller.signal);
                 setSongLyrics(result.lyrics);
                 setHasTimestamps(result.hasTimestamps);
+                console.log("LYRICS: ", result)
             } catch {
                 if (!controller.signal.aborted) {
                     setErrorMessage('Unable to load lyrics right now.');
@@ -313,16 +337,22 @@ export default function SongPage() {
             </section>
 
             <div>
-                <MusicPlayer 
-                    player={youtube} 
-                    artist={songInfo.artist_eng_name}
-                    img={songInfo.cover_url}
-                    title={songInfo.orig_title}
-                    ytVideoId={ytVideoId || songInfo.yt_id}
-                    onPreviousLyric={handlePreviousLyric}
-                    onNextLyric={handleNextLyric}
-                    canSeekLyrics={hasTimestamps}
-                />
+                {isYoutubeLoading ? (
+                    <p role="status" aria-live="polite">Loading YouTube video...</p>
+                ) : ytVideoId ? (
+                    <MusicPlayer 
+                        player={youtube} 
+                        artist={songInfo.artist_eng_name}
+                        img={songInfo.cover_url}
+                        title={songInfo.orig_title}
+                        ytVideoId={ytVideoId}
+                        onPreviousLyric={handlePreviousLyric}
+                        onNextLyric={handleNextLyric}
+                        canSeekLyrics={hasTimestamps}
+                    />
+                ) : youtubeError ? (
+                    <p role="alert">{youtubeError}</p>
+                ) : null}
             </div>
 
         </main>

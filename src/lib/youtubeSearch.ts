@@ -59,7 +59,7 @@ export async function fetchVideoId(artist: string, title: string) {
   return results[0]?.id.videoId;
 }
 
-// return the details of the top 10 youtube search results
+// return the videoIds of the top 10 youtube search results
 export async function fetchVideoIds(artist: string, title: string) {
     const results = await searchYoutube(artist, title);
 
@@ -165,6 +165,7 @@ function normalize(text: string): string {
     .trim();
 }
 
+// assign each youtube search result a score based on how likely it is to be the official audio
 export function scoreYouTubeResult(
   result: YouTubeSearchResult,
   songTitle: string,

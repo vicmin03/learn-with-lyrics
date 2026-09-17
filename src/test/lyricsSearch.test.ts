@@ -51,17 +51,19 @@ describe('lyrics search', () => {
 
     test('removes credit lines only from the boundaries', () => {
         const lyrics: LyricsDict[] = [
+            { id: 'title', start_time: 0, text: '周杰伦 - 晴天' },
             { id: 'credit-1', start_time: 0, text: '作曲: Composer' },
             { id: 'line-1', start_time: 1000, text: '第一句歌词' },
             { id: 'line-2', start_time: 2000, text: '歌词中的:文字' },
             { id: 'line-3', start_time: 3000, text: '最后一句歌词' },
             { id: 'credit-2', start_time: 4000, text: '母带处理： Studio' },
+            { id: 'credit-3', start_time: 5000, text: 'Artist - Song' },
         ];
 
         expect(removeBoundaryCreditLines(lyrics)).toEqual([
-            lyrics[1],
             lyrics[2],
             lyrics[3],
+            lyrics[4],
         ]);
     });
 
