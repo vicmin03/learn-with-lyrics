@@ -10,12 +10,22 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem 2rem;
-    flex: 3;
+    flex: 2;
 }
 
 .form-secondary-section {
     min-width: 0;
     flex: 1;
+}
+
+.youtube-search-button {
+    width: 100%;
+}
+
+.youtube-results-loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
 }
 
 .form-input-line,

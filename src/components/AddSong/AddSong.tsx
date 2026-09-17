@@ -11,6 +11,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { FiUpload } from "react-icons/fi";
 import { addSongValuesSchema, AddSongValues, Artist, SelectOption, languageOptions, scriptOptions, SubmissionStatus } from "./helpers";
 import { SelectYTVid } from "../SelectYTVid/SelectYTVid";
+import { fetchVideoDetails, YouTubeVideoDetails } from "../../lib/youtubeSearch";
 
 
 export function AddSong() {
@@ -20,6 +21,37 @@ export function AddSong() {
 
     const artistName = useWatch({ control, name: "artist_name" });
     const originalTitle = useWatch({ control, name: "orig_title" });
+    const [ytVids, setYTVids] = useState<YouTubeVideoDetails[]>([]);
+    const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+    const [youtubeError, setYoutubeError] = useState<string | null>(null);
+    const [youtubeQuery, setYoutubeQuery] = useState<string | null>(null);
+    const searchQuery = `${artistName?.trim() ?? ""} ${originalTitle?.trim() ?? ""}`.trim();
+    const hasYoutubeSearchFields = Boolean(artistName?.trim() && originalTitle?.trim());
+    const displayedYoutubeVideos = youtubeQuery === searchQuery ? ytVids : [];
+    const displayedYoutubeError = youtubeQuery === searchQuery ? youtubeError : null;
+
+    const getYoutubeResults = async () => {
+        if (!artistName?.trim() || !originalTitle?.trim()) {
+            return;
+        }
+
+        setIsYoutubeLoading(true);
+        setYoutubeError(null);
+        setYoutubeQuery(null);
+
+        try {
+            const results = await fetchVideoDetails(artistName.trim(), originalTitle.trim());
+            setYTVids(results);
+            setYoutubeQuery(`${artistName.trim()} ${originalTitle.trim()}`);
+        } catch (fetchError) {
+            console.error("Failed to load YouTube videos:", fetchError);
+            setYTVids([]);
+            setYoutubeError("Unable to load YouTube videos right now.");
+            setYoutubeQuery(`${artistName.trim()} ${originalTitle.trim()}`);
+        } finally {
+            setIsYoutubeLoading(false);
+        }
+    };
 
 
     // load artist names from supabase table for select 
@@ -319,16 +351,33 @@ export function AddSong() {
                             </label>
                         </div>
                     </div>
+                    {hasYoutubeSearchFields && (
+                        <Button
+                            className="submit-button youtube-search-button"
+                            type="button"
+                            onClick={getYoutubeResults}
+                            disabled={isSubmitting || isYoutubeLoading}
+                            startIcon={isYoutubeLoading ? <CircularProgress size={16} /> : undefined}
+                        >
+                            {isYoutubeLoading ? "Searching..." : "Find YouTube videos"}
+                        </Button>
+                    )}
                 </div>
                 {/* conditionally show secondary section after inputting artist name and song title debounced with  */}
                 <div className="form-secondary-section">
-                    {artistName?.trim() && originalTitle?.trim() && (
-                        <SelectYTVid
-                            artist={artistName.trim()}
-                            title={originalTitle.trim()}
-                            disabled={isSubmitting}
-                            onSelect={(videoId) => setValue("yt_id", videoId, { shouldValidate: true })}
-                        />
+                    {hasYoutubeSearchFields && (
+                        <>
+                            {displayedYoutubeError && <p role="alert">{displayedYoutubeError}</p>}
+                            {isYoutubeLoading && (
+                                <div className="youtube-results-loading" role="status" aria-label="Loading YouTube videos">
+                                    <CircularProgress size={28} />
+                                </div>
+                            )}
+                            <SelectYTVid
+                                videos={displayedYoutubeVideos}
+                                onSelect={(videoId) => setValue("yt_id", videoId, { shouldValidate: true })}
+                            />
+                        </>
                     )}
                 </div>
             </form>

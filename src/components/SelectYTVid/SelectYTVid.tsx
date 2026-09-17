@@ -1,13 +1,10 @@
 import "./SelectYTVid.css";
-import { useState } from "react";
-import { fetchVideoDetails, YouTubeVideoDetails } from "../../lib/youtubeSearch";
-import { Button, CircularProgress, MenuList, MenuItem, ListItemIcon } from "@mui/material";
+import { YouTubeVideoDetails } from "../../lib/youtubeSearch";
+import { MenuList, MenuItem, ListItemIcon } from "@mui/material";
 
 interface SelectYTVidProps {
-    artist: string,
-    title: string,
     onSelect: (videoId: string) => void,
-    disabled?: boolean,
+    videos: YouTubeVideoDetails[],
 }
 
 // convert youtube video duration from PT#H#M#S format to HH:MM:SS
@@ -34,41 +31,11 @@ function convertYTTimestamp (duration: string) {
 }
 
 
-export function SelectYTVid ({artist, title, onSelect, disabled = false} : SelectYTVidProps) {
-    const [ytVids, setYTVids] = useState<YouTubeVideoDetails[]>([])
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const getResults = async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const results = await fetchVideoDetails(artist, title);
-            setYTVids(results);
-        } catch (fetchError) {
-            console.error("Failed to load YouTube videos:", fetchError);
-            setYTVids([]);
-            setError("Unable to load YouTube videos right now.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
+export function SelectYTVid ({onSelect, videos} : SelectYTVidProps) {
     return (
         <>
             <MenuList className="yt-results-menu">
-                <Button
-                    className="submit-button"
-                    type="button"
-                    onClick={getResults}
-                    disabled={disabled || isLoading}
-                    startIcon={isLoading ? <CircularProgress size={16} /> : undefined}
-                >
-                    {isLoading ? "Searching..." : "Find YouTube videos"}
-                </Button>
-                {error && <p role="alert">{error}</p>}
-                {ytVids.map((result) => (
+                {videos.map((result) => (
                     <MenuItem
                         className="yt-search-result"
                         key={result.id.videoId}

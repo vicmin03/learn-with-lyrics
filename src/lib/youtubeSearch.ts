@@ -202,4 +202,5 @@ export function scoreYouTubeResult(
   if (title.includes("music video")) score -= 10;
 
   return score;
+  // return 100;
 }
