@@ -41,13 +41,38 @@
 }
 
 .yt-result-title {
-    max-width: 100%;
+    width: 100%;
     margin: 0;
     overflow: hidden;
     color: var(--text-h);
     font: 600 0.95rem/1.3 sans-serif;
-    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.yt-result-title-text {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+.yt-result-title--scrolling .yt-result-title-text {
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    animation: yt-title-marquee 6s ease-in-out infinite alternate;
+    animation-delay: 0.35s;
+}
+
+@keyframes yt-title-marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(var(--title-scroll-distance));
+    }
 }
 
 .yt-result-channel {

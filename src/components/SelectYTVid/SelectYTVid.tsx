@@ -1,4 +1,5 @@
 import "./SelectYTVid.css";
+import { useRef, useState } from "react";
 import { YouTubeVideoDetails } from "../../lib/youtubeSearch";
 import { MenuList, MenuItem, ListItemIcon } from "@mui/material";
 
@@ -31,33 +32,67 @@ function convertYTTimestamp (duration: string) {
 }
 
 
+interface YouTubeResultProps {
+    result: YouTubeVideoDetails;
+    onSelect: (videoId: string) => void;
+}
+
+function YouTubeResult({ result, onSelect }: YouTubeResultProps) {
+    const titleRef = useRef<HTMLSpanElement>(null);
+    const [titleScroll, setTitleScroll] = useState(0);
+    const [isTitleHovered, setIsTitleHovered] = useState(false);
+
+    const handleMouseEnter = () => {
+        const title = titleRef.current;
+        if (!title) {
+            return;
+        }
+
+        setTitleScroll(Math.max(0, title.scrollWidth - title.parentElement!.clientWidth));
+        setIsTitleHovered(true);
+    };
+
+    return (
+        <MenuItem
+            className="yt-search-result"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => setIsTitleHovered(false)}
+            onClick={() => {
+                if (result.id.videoId) {
+                    onSelect(result.id.videoId);
+                }
+            }}
+        >
+            <ListItemIcon>
+                <img className="yt-thumbnail"
+                    src={result.snippet.thumbnails?.medium?.url}
+                    alt={result.snippet.title} />
+            </ListItemIcon>
+            <div className="yt-result-info">
+                <div className={`yt-result-title ${isTitleHovered && titleScroll > 0 ? "yt-result-title--scrolling" : ""}`}>
+                    <span
+                        ref={titleRef}
+                        className="yt-result-title-text"
+                        style={{ "--title-scroll-distance": `-${titleScroll}px` } as React.CSSProperties}
+                    >
+                        {result.snippet.title}
+                    </span>
+                </div>
+                <p className="yt-result-channel">{result.snippet.channelTitle}</p>
+            </div>
+            <p className="yt-result-duration">
+                {convertYTTimestamp(result.contentDetails.duration)}
+            </p>
+        </MenuItem>
+    );
+}
+
 export function SelectYTVid ({onSelect, videos} : SelectYTVidProps) {
     return (
         <>
             <MenuList className="yt-results-menu">
                 {videos.map((result) => (
-                    <MenuItem
-                        className="yt-search-result"
-                        key={result.id.videoId}
-                        onClick={() => {
-                            if (result.id.videoId) {
-                                onSelect(result.id.videoId);
-                            }
-                        }}
-                    >
-                        <ListItemIcon >
-                            <img className="yt-thumbnail"
-                                src={result.snippet.thumbnails?.medium?.url} 
-                                alt={result.snippet.title} />
-                        </ListItemIcon>
-                        <div className="yt-result-info">
-                            <p className="yt-result-title">{result.snippet.title}</p>
-                            <p className="yt-result-channel">{result.snippet.channelTitle}</p>
-                        </div>
-                        <p className="yt-result-duration">
-                            {convertYTTimestamp(result.contentDetails.duration)}
-                        </p>
-                    </MenuItem>
+                    <YouTubeResult key={result.id.videoId} result={result} onSelect={onSelect} />
                 ))}
                 
             </MenuList>
