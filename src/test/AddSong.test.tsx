@@ -76,6 +76,38 @@ describe('AddSong', () => {
 		expect(await within(youtubeField as HTMLElement).findByText(/Too small/)).toBeInTheDocument();
 	});
 
+	test('disables and clears the cover image upload when using a YouTube thumbnail', async () => {
+		select.mockResolvedValue({ data: artists, error: null });
+		from.mockReturnValue({ select });
+		const user = userEvent.setup();
+		renderForm();
+
+		const fileInput = screen.getByLabelText('Choose cover image');
+		const thumbnailCheckbox = screen.getByRole('checkbox', { name: 'Use YT thumbnail as cover image' });
+		const coverImageSection = screen.getByText('Cover Image').parentElement as HTMLElement;
+		const coverFile = new File(['cover'], 'cover.png', { type: 'image/png' });
+
+		expect(fileInput).toBeEnabled();
+		expect(thumbnailCheckbox).toBeEnabled();
+		await user.upload(fileInput, coverFile);
+		expect(fileInput).toHaveValue('C:\\fakepath\\cover.png');
+
+		await user.click(thumbnailCheckbox);
+
+		expect(thumbnailCheckbox).toBeChecked();
+		const disabledFileInput = screen.getByLabelText('Choose cover image');
+		expect(disabledFileInput).toBeDisabled();
+		expect(disabledFileInput).toHaveValue('');
+		expect(screen.getByText('Choose cover image')).toBeInTheDocument();
+		expect(coverImageSection).toHaveClass('cover-image-disabled');
+
+		await user.click(thumbnailCheckbox);
+
+		expect(thumbnailCheckbox).not.toBeChecked();
+		expect(screen.getByLabelText('Choose cover image')).toBeEnabled();
+		expect(coverImageSection).not.toHaveClass('cover-image-disabled');
+	});
+
 	test('accepts a supported script option', async () => {
 		select.mockResolvedValue({ data: artists, error: null });
 		from.mockImplementation((table: string) => table === 'Artists'
@@ -90,7 +122,7 @@ describe('AddSong', () => {
 		await user.click(screen.getAllByRole('combobox')[1]);
 		await user.click(screen.getByText('Chinese'));
 		await user.click(screen.getAllByRole('combobox')[2]);
-		await user.click(screen.getByText('Simplified'));
+		await user.click(screen.getByText('Simplified 简体'));
 		await user.type(screen.getByPlaceholderText('Select correct audio or enter YouTube video id'), 'abcdefghijk');
 		await user.click(screen.getByRole('button', { name: 'Add New Song' }));
 

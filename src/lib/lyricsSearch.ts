@@ -24,7 +24,7 @@ interface LyricsApiData {
 
 // for removing lines of artist credits from song lyrics
 function isCreditLine(line: LyricsDict): boolean {
-    return /[:：]/.test(line.text);
+    return /[:：]|\s[-‐‑‒–—―]\s/.test(line.text);
 }
 
 export function removeBoundaryCreditLines(lyrics: LyricsDict[]): LyricsDict[] {

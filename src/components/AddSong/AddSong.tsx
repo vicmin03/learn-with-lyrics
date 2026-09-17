@@ -1,8 +1,8 @@
 import "./AddSong.css";
 import { useState, useEffect } from "react";
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller } from "react-hook-form";
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Checkbox } from "@mui/material";
 import { ErrorText } from "../ErrorText/ErrorText";
 import { FormInputLine } from "../FormInputLine";
 import Select from "react-select";
@@ -10,12 +10,49 @@ import CreatableSelect from "react-select/creatable";
 import { supabase } from "../../lib/supabaseClient";
 import { FiUpload } from "react-icons/fi";
 import { addSongValuesSchema, AddSongValues, Artist, SelectOption, languageOptions, scriptOptions, SubmissionStatus } from "./helpers";
+import { SelectYTVid } from "../SelectYTVid/SelectYTVid";
+import { fetchVideoDetails, YouTubeVideoDetails } from "../../lib/youtubeSearch";
 
 
 export function AddSong() {
     const { register, control, handleSubmit, setValue, reset, formState: { errors, isSubmitting }} = useForm<AddSongValues>({
         resolver: zodResolver(addSongValuesSchema)
     })
+
+    const artistName = useWatch({ control, name: "artist_name" });
+    const originalTitle = useWatch({ control, name: "orig_title" });
+    const youtubeVideoId = useWatch({ control, name: "yt_id" });
+    const [ytVids, setYTVids] = useState<YouTubeVideoDetails[]>([]);
+    const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+    const [youtubeError, setYoutubeError] = useState<string | null>(null);
+    const [youtubeQuery, setYoutubeQuery] = useState<string | null>(null);
+    const searchQuery = `${artistName?.trim() ?? ""} ${originalTitle?.trim() ?? ""}`.trim();
+    const hasYoutubeSearchFields = Boolean(artistName?.trim() && originalTitle?.trim());
+    const displayedYoutubeVideos = youtubeQuery === searchQuery ? ytVids : [];
+    const displayedYoutubeError = youtubeQuery === searchQuery ? youtubeError : null;
+
+    const getYoutubeResults = async () => {
+        if (!artistName?.trim() || !originalTitle?.trim()) {
+            return;
+        }
+
+        setIsYoutubeLoading(true);
+        setYoutubeError(null);
+        setYoutubeQuery(null);
+
+        try {
+            const results = await fetchVideoDetails(artistName.trim(), originalTitle.trim());
+            setYTVids(results);
+            setYoutubeQuery(`${artistName.trim()} ${originalTitle.trim()}`);
+        } catch (fetchError) {
+            console.error("Failed to load YouTube videos:", fetchError);
+            setYTVids([]);
+            setYoutubeError("Unable to load YouTube videos right now.");
+            setYoutubeQuery(`${artistName.trim()} ${originalTitle.trim()}`);
+        } finally {
+            setIsYoutubeLoading(false);
+        }
+    };
 
 
     // load artist names from supabase table for select 
@@ -30,6 +67,10 @@ export function AddSong() {
     // for uploading cover image
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [coverInputKey, setCoverInputKey] = useState(0);
+    const [useYoutubeThumbnail, setUseYoutubeThumbnail] = useState(false);
+
+    const selectedYoutubeVideo = ytVids.find((video) => video.id.videoId === youtubeVideoId);
+    const youtubeThumbnailUrl = selectedYoutubeVideo?.snippet.thumbnails?.medium?.url ?? null;
 
     useEffect(() => {
         const getArtists = async() => {
@@ -129,9 +170,15 @@ export function AddSong() {
             return;
         }
 
-        // upload cover image to supabase storage
+        // Use the selected video's thumbnail directly when requested.
         let imageUrl: string | null = null;
-        if (coverImage) {
+        if (useYoutubeThumbnail) {
+            imageUrl = youtubeThumbnailUrl;
+            if (imageUrl === null) {
+                setSubmissionStatus({ type: "error", message: "The YouTube thumbnail could not be found. Please select a YouTube video first." });
+                return;
+            }
+        } else if (coverImage) {
             imageUrl = await uploadImage(coverImage);
             if (imageUrl === null) {
                 setSubmissionStatus({ type: "error", message: "The cover image could not be uploaded. Please try again." });
@@ -152,6 +199,7 @@ export function AddSong() {
         setIsArtistEnglishNameDisabled(false);
         setCoverImage(null);
         setCoverInputKey((key) => key + 1);
+        setUseYoutubeThumbnail(false);
         setSubmissionStatus({ type: "success", message: successMessage });
         console.log("ADDED NEW SONG", data);
     }
@@ -163,163 +211,209 @@ export function AddSong() {
         }
     }
 
+    // set cover image to be youtube thumbnail
+    const handleThumbnailToggle = (checked: boolean) => {
+        setUseYoutubeThumbnail(checked);
+        if (checked) {
+            setCoverImage(null);
+            setCoverInputKey((key) => key + 1);
+        }
+    }
+
     return (
         <>
             <h1>Add new song</h1>
 
             <form className="add-song-form" onSubmit={handleSubmit(submitForm)} id="add-song-form">
-                <div className="form-select-container">
-                    <p className="form-label">Artist Name</p>
-                    <Controller
-                        name="artist_name"
-                        control={control}
-                        render={({field}) => (
-                            <>
-                                <CreatableSelect 
-                                    className="form-select" 
-                                    classNamePrefix="form-select"
-                                    isDisabled={isSubmitting}
-                                    isClearable
-                                    options={artistOptions}
-                                    value={artistOptions.find( (option) => option.label === field.value ) ?? (field.value ? { value: field.value, label: field.value } : null)}
-                                    onChange={(option) => {
-                                        if (!option) {
-                                            field.onChange('');
-                                            setValue('artist_eng_name', '');
-                                            setIsArtistEnglishNameDisabled(false);
-                                            setCurrentArtistId(null);
-                                            return;
-                                        }
-                                        // find existing artist's english name 
-                                        const artist = artists.find(
-                                            (artist) => artist.artist_name === option.label
-                                        );
-                                        field.onChange(option.label);
-                                        setValue("artist_eng_name", artist?.artist_eng_name ?? "");
-                                        setCurrentArtistId(artist?.artist_id ?? null);
-                                        setIsArtistEnglishNameDisabled(Boolean(artist?.artist_eng_name));
-                                    }}     
-                                    placeholder="Select an artist"
-                                    onBlur={field.onBlur}     
-                                />
-                                <ErrorText msg={errors.artist_name?.message}/>
-                            </>
-                        )}
-                    />
-                </div>
-                <FormInputLine 
-                    register={register} 
-                    errors={errors}
-                    label="Artist Name - English" 
-                    field="artist_eng_name" 
-                    placeholder="Enter artist name (in English)"
-                    disabled={isSubmitting || isArtistEnglishNameDisabled}
-                />
-                <FormInputLine 
-                    register={register} 
-                    errors={errors}
-                    label="Song Title" 
-                    field="orig_title" 
-                    placeholder="Enter song title (in original language)"
-                    disabled={isSubmitting}
-                />
-                <FormInputLine 
-                    register={register} 
-                    errors={errors}
-                    label="Song Title - English (optional)" 
-                    field="eng_title" 
-                    placeholder="Enter song title (in English)"
-                    disabled={isSubmitting}
-                />
-                <div className="form-select-container">
-                    <p className="form-label">Language</p>
-                    <Controller
-                        name="language"
-                        control={control}
-                        rules={{ required: "Song Language is required"}}
-                        render={({field}) => (
-                            <>
-                                <Select 
-                                    className="form-select" 
-                                    classNamePrefix="form-select"
-                                    isDisabled={isSubmitting}
-                                    options={languageOptions}
-                                    value={ languageOptions.find( (option) => option.label === field.value ) ?? null } 
-                                    onChange={(option) => { field.onChange(option?.label ?? ''); }}
-                                    placeholder="Select language"
-                                />
-                                <ErrorText msg={errors.language?.message}/>
-                            </>
-                            
-                        )}
-                    />
-                </div>
-                <div className="form-select-container">
-                    <p className="form-label">Script</p>
-                    <Controller
-                        name="script"
-                        control={control}
-                        rules={{ required: "Song script is required"}}
-                        render={({field}) => (
-                            <>
-                                <Select 
-                                    className="form-select" 
-                                    classNamePrefix="form-select"
-                                    isDisabled={isSubmitting}
-                                    options={scriptOptions} 
-                                    value={ scriptOptions.find( (option) => option.value === field.value ) ?? null }
-                                    // convert from label back to value (e.g. Simplified -> ch)
-                                    onChange={(option) => { field.onChange(option?.value ?? ''); }}
-                                    onBlur={field.onBlur} 
-                                    placeholder="Select script..."
-                                />
-                                <ErrorText msg={errors.script?.message}/>
-                            </>
-                        )}
-                    />
-                </div>
-                <FormInputLine 
-                    register={register} 
-                    errors={errors}
-                    label="Album (optional)" 
-                    field="album" 
-                    placeholder="Enter name of album"
-                    disabled={isSubmitting}
-                />
-                <FormInputLine 
-                    register={register} 
-                    errors={errors}
-                    label="Youtube Video ID" 
-                    field="yt_id" 
-                    placeholder="Select correct audio or enter YouTube video id"
-                    disabled={isSubmitting}
-                />
-                <div className="form-select-container">
-                    <p className="form-label">Cover Image</p>
-                    <div className="file-input-wrapper">
-                        <input 
-                            className="file-input"
-                            id="cover-image-input"
-                            key={coverInputKey} 
-                            type="file"
-                            accept="image/*" 
-                            onChange={handleFileChange}
-                            disabled={isSubmitting}
+                <div className="form-main-section">
+                    <div className="form-select-container">
+                        <p className="form-label">Artist Name</p>
+                        <Controller
+                            name="artist_name"
+                            control={control}
+                            render={({field}) => (
+                                <>
+                                    <CreatableSelect 
+                                        className="form-select" 
+                                        classNamePrefix="form-select"
+                                        isDisabled={isSubmitting}
+                                        isClearable
+                                        options={artistOptions}
+                                        value={artistOptions.find( (option) => option.label === field.value ) ?? (field.value ? { value: field.value, label: field.value } : null)}
+                                        onChange={(option) => {
+                                            if (!option) {
+                                                field.onChange('');
+                                                setValue('artist_eng_name', '');
+                                                setIsArtistEnglishNameDisabled(false);
+                                                setCurrentArtistId(null);
+                                                return;
+                                            }
+                                            // find existing artist's english name 
+                                            const artist = artists.find(
+                                                (artist) => artist.artist_name === option.label
+                                            );
+                                            field.onChange(option.label);
+                                            setValue("artist_eng_name", artist?.artist_eng_name ?? "");
+                                            setCurrentArtistId(artist?.artist_id ?? null);
+                                            setIsArtistEnglishNameDisabled(Boolean(artist?.artist_eng_name));
+                                        }}     
+                                        placeholder="Select an artist"
+                                        onBlur={field.onBlur}     
+                                    />
+                                    <ErrorText msg={errors.artist_name?.message}/>
+                                </>
+                            )}
                         />
-                        <label className="file-input-label" htmlFor="cover-image-input">
-                            <span className={!coverImage ? "file-input-placeholder" : undefined}>
-                                {coverImage?.name ?? "Choose cover image"}
-                            </span>
-                            <FiUpload className="file-input-icon" aria-hidden="true" />
-                        </label>
                     </div>
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Artist Name - English" 
+                        field="artist_eng_name" 
+                        placeholder="Enter artist name (in English)"
+                        disabled={isSubmitting || isArtistEnglishNameDisabled}
+                    />
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Song Title" 
+                        field="orig_title" 
+                        placeholder="Enter song title (in original language)"
+                        disabled={isSubmitting}
+                    />
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Song Title - English (optional)" 
+                        field="eng_title" 
+                        placeholder="Enter song title (in English)"
+                        disabled={isSubmitting}
+                    />
+                    <div className="form-select-container">
+                        <p className="form-label">Language</p>
+                        <Controller
+                            name="language"
+                            control={control}
+                            rules={{ required: "Song Language is required"}}
+                            render={({field}) => (
+                                <>
+                                    <Select 
+                                        className="form-select" 
+                                        classNamePrefix="form-select"
+                                        isDisabled={isSubmitting}
+                                        options={languageOptions}
+                                        value={ languageOptions.find( (option) => option.label === field.value ) ?? null } 
+                                        onChange={(option) => { field.onChange(option?.label ?? ''); }}
+                                        placeholder="Select language"
+                                    />
+                                    <ErrorText msg={errors.language?.message}/>
+                                </>
+                                
+                            )}
+                        />
+                    </div>
+                    <div className="form-select-container">
+                        <p className="form-label">Script</p>
+                        <Controller
+                            name="script"
+                            control={control}
+                            rules={{ required: "Song script is required"}}
+                            render={({field}) => (
+                                <>
+                                    <Select 
+                                        className="form-select" 
+                                        classNamePrefix="form-select"
+                                        isDisabled={isSubmitting}
+                                        options={scriptOptions} 
+                                        value={ scriptOptions.find( (option) => option.value === field.value ) ?? null }
+                                        // convert from label back to value (e.g. Simplified -> ch)
+                                        onChange={(option) => { field.onChange(option?.value ?? ''); }}
+                                        onBlur={field.onBlur} 
+                                        placeholder="Select script..."
+                                    />
+                                    <ErrorText msg={errors.script?.message}/>
+                                </>
+                            )}
+                        />
+                    </div>
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Album (optional)" 
+                        field="album" 
+                        placeholder="Enter name of album"
+                        disabled={isSubmitting}
+                    />
+                    <div className={`form-select-container ${useYoutubeThumbnail ? "cover-image-disabled" : ""}`}>
+                        <p className="form-label">Cover Image</p>
+                        <div className="file-input-wrapper">
+                            <input 
+                                className="file-input"
+                                id="cover-image-input"
+                                key={coverInputKey} 
+                                type="file"
+                                accept="image/*" 
+                                onChange={handleFileChange}
+                                disabled={isSubmitting || useYoutubeThumbnail}
+                            />
+                            <label className="file-input-label" htmlFor="cover-image-input">
+                                <span className={!coverImage ? "file-input-placeholder" : undefined}>
+                                    {coverImage?.name ?? "Choose cover image"}
+                                </span>
+                                <FiUpload className="file-input-icon" aria-hidden="true" />
+                            </label>
+                        </div>
+                        <FormControlLabel
+                            className="form-checkbox-label"
+                            control={
+                                <Checkbox
+                                    checked={useYoutubeThumbnail}
+                                    onChange={(event) => handleThumbnailToggle(event.target.checked)}
+                                    disabled={isSubmitting}
+                                />
+                            }
+                            label="Use YT thumbnail as cover image" />
+                    </div>
+
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Youtube Video ID" 
+                        field="yt_id" 
+                        placeholder="Select correct audio or enter YouTube video id"
+                        disabled={isSubmitting}
+                    />
+                    {hasYoutubeSearchFields && (
+                        <Button
+                            className="youtube-search-button"
+                            type="button"
+                            onClick={getYoutubeResults}
+                            disabled={isSubmitting || isYoutubeLoading}
+                            startIcon={isYoutubeLoading ? <CircularProgress size={16} /> : undefined}
+                        >
+                            {isYoutubeLoading ? "Searching..." : "Find YouTube videos"}
+                        </Button>
+                    )}
                 </div>
-           
-                
-                
+                <div className="form-secondary-section">
+                    {hasYoutubeSearchFields && (
+                        <>
+                            {displayedYoutubeError && <p role="alert">{displayedYoutubeError}</p>}
+                            {isYoutubeLoading && (
+                                <div className="youtube-results-loading" role="status" aria-label="Loading YouTube videos">
+                                    <CircularProgress size={28} />
+                                </div>
+                            )}
+                            <SelectYTVid
+                                videos={displayedYoutubeVideos}
+                                onSelect={(videoId) => setValue("yt_id", videoId, { shouldValidate: true })}
+                            />
+                        </>
+                    )}
+                </div>
             </form>
             <Button
-                className="submit-button"
+                className="submit-button add-song-submit-button"
                 type="submit"
                 loading={isSubmitting}
                 loadingIndicator={
@@ -348,7 +442,7 @@ export function AddSong() {
                 </DialogContent>
                 {!isSubmitting && (
                     <DialogActions>
-                        <Button onClick={() => setSubmissionStatus(null)}>Close</Button>
+                        <Button className="submit-button" onClick={() => setSubmissionStatus(null)}>Close</Button>
                     </DialogActions>
                 )}
             </Dialog>

@@ -1,8 +1,71 @@
 .add-song-form {
     padding: 1rem;
+    gap: 1rem 2rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.form-main-section {
+    min-width: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem 2rem;
+    flex: 2;
+}
+
+.form-secondary-section {
+    min-width: 0;
+    flex: 1;
+}
+
+.youtube-search-button.MuiButton-root {
+    align-self: start;
+    min-height: 38px;
+    width: 100%;
+    border: 1px solid var(--accent-border);
+    border-radius: 6px;
+    background-color: var(--accent-bg);
+    color: var(--text-h);
+    font-weight: 600;
+    text-transform: none;
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.youtube-search-button.MuiButton-root:hover {
+    background-color: var(--accent-border);
+    border-color: var(--accent);
+    color: var(--text-h);
+}
+
+.add-song-submit-button {
+    display: flex;
+    width: calc(100% - 2rem);
+    min-height: 46px;
+    margin: 0 1rem;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.form-select .form-select__control {
+    min-height: 34px;
+    align-items: center;
+}
+
+.form-select .form-select__value-container {
+    padding: 0;
+}
+
+.form-select .form-select__input-container,
+.form-select .form-select__placeholder {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4375em;
+}
+
+.youtube-results-loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
 }
 
 .form-input-line,
@@ -109,6 +172,23 @@
     cursor: default;
 }
 
+.cover-image-disabled .form-label,
+.cover-image-disabled .file-input-label,
+.cover-image-disabled .file-input-placeholder,
+.cover-image-disabled .file-input-icon {
+    color: rgba(0, 0, 0, 0.38);
+}
+
+.cover-image-disabled .file-input-label {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+}
+
 .file-input-icon {
     margin-left: auto;
+}
+
+.form-checkbox-label {
+    justify-content: left;
+    font-size: small;
 }

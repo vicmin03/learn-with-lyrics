@@ -1,4 +1,5 @@
 const API_KEY = import.meta.env.VITE_YT_DATA_API_KEY;
+const MAX_RESULTS = "8";
 
 export type YouTubeSearchResult = {
   id: {
@@ -18,12 +19,48 @@ export type YouTubeSearchResult = {
   };
 };
 
+type YouTubeContentDetails = {
+  id: string,
+  contentDetails: {
+    duration: string;
+    licensedContent: boolean;
+  }
+}
+
+export type YouTubeVideoDetails = {
+  id: {
+    kind: string;
+    videoId?: string;
+  };
+  snippet: {
+    title: string;
+    description: string;
+    channelTitle: string;
+    publishedAt: string;
+    thumbnails?: {
+      medium?: {
+        url: string;
+      };
+    };
+  };
+  contentDetails: {
+    duration: string;
+    licensedContent: boolean;
+  }
+}
+
 type scoredVideo = {
     result: YouTubeSearchResult,
     score: number
 }
 
 export async function fetchVideoId(artist: string, title: string) {
+  const results = await fetchVideoIds(artist, title);
+  return results[0]?.id.videoId;
+}
+
+// return the videoIds of the top 10 youtube search results
+export async function fetchVideoIds(artist: string, title: string) {
     const results = await searchYoutube(artist, title);
 
     const ranked = results
@@ -39,16 +76,52 @@ export async function fetchVideoId(artist: string, title: string) {
         .sort((a: scoredVideo, b: scoredVideo) => b.score - a.score); 
 
     console.log(ranked);
-    return ranked[0].result.id.videoId;
+    return ranked.map(({ result }) => result);
+}
+
+// return details of top 10 videos with duration and whether content is licensed 
+export async function fetchVideoDetails(artist: string, title: string) {
+  const results = await fetchVideoIds(artist, title);
+
+  const videoIds = results
+    .map(result => result.id?.videoId)
+    .filter((id): id is string => !!id);
+
+  // get video details (e.g. duration for each videoID)
+  const detailsResponse = await getVideoDetails(videoIds);
+
+  // combine with correct video ID
+  const detailsById = new Map(
+    detailsResponse.map(video => [
+      video.id,
+      video.contentDetails,
+    ])
+  );
+
+  return results.filter(result => result.id.videoId)
+    .map(result => {
+      const videoId = result.id.videoId!;
+      const contentDetails = detailsById.get(videoId);
+
+      return {
+        id: result.id,
+        snippet: result.snippet!,
+        contentDetails: {
+          duration: contentDetails?.duration ?? "",
+          licensedContent: contentDetails?.licensedContent ?? false,
+        },
+      };
+    }
+  );
 }
 
 // function to fetch youtube video ID from song artist and title query
-async function searchYoutube(artist: string, title: string) {
+async function searchYoutube(artist: string, title: string): Promise<YouTubeSearchResult[]> {
     const params = new URLSearchParams({
         part: "snippet",
         q: `${artist} ${title} official audio`,
         type: "video",
-        maxResults: "10",
+        maxResults: MAX_RESULTS,
         key: API_KEY,
         videoCategoryId: "10",
         videoEmbeddable: "true",
@@ -65,6 +138,24 @@ async function searchYoutube(artist: string, title: string) {
     return data.items;
 };
 
+// function to fetch youtube video content details with call to videos/list
+async function getVideoDetails(videoIds: string[]): Promise<YouTubeContentDetails[]> {
+    const params = new URLSearchParams({
+        part: "contentDetails",
+        id: videoIds.toString(),
+        key: API_KEY
+    })
+    const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos/?${params}`
+    )
+    if (!response.ok) {
+        throw new Error(`YouTube API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.items;
+}
+
 // function to score youtube results in order of relevance to extract best audio for song
 function normalize(text: string): string {
   return text
@@ -74,6 +165,7 @@ function normalize(text: string): string {
     .trim();
 }
 
+// assign each youtube search result a score based on how likely it is to be the official audio
 export function scoreYouTubeResult(
   result: YouTubeSearchResult,
   songTitle: string,
@@ -86,17 +178,15 @@ export function scoreYouTubeResult(
   let score = 0;
 
   if (title.includes(expectedTitle)) score += 50;
-  if (title.includes(expectedArtist)) score += 40;
-
-  // Prefer audio-focused uploads
-  if (title.includes("official audio")) score += 30;
-  if (title.includes("audio")) score += 15;
+  if (title.includes(expectedArtist)) score += 20;
 
   // Prefer official releases
   if (title.includes("official")) score += 10;
 
   // Penalize things that may not match the original recording
+  if (title.includes("lyrics")) score -= 20;
   if (title.includes("live")) score -= 30;
+  if (title.includes("stage")) score -= 30;
   if (title.includes("remix")) score -= 30;
   if (title.includes("cover")) score -= 40;
   if (title.includes("acoustic")) score -= 20;
