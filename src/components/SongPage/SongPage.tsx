@@ -110,7 +110,7 @@ export default function SongPage() {
 
             try {
                 const videoId = await fetchVideoId(songInfo.artist_eng_name, songInfo.orig_title);
-                if (!isCancelled) {
+                if (!isCancelled && videoId) {
                     setYtVideoId(videoId);
                 }
             } catch (error) {

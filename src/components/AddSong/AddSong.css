@@ -1,8 +1,21 @@
 .add-song-form {
     padding: 1rem;
+    gap: 1rem 2rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.form-main-section {
+    min-width: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem 2rem;
+    flex: 3;
+}
+
+.form-secondary-section {
+    min-width: 0;
+    flex: 1;
 }
 
 .form-input-line,
