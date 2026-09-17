@@ -2,7 +2,7 @@ import "./AddSong.css";
 import { useState, useEffect } from "react";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller, useWatch } from "react-hook-form";
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Checkbox } from "@mui/material";
 import { ErrorText } from "../ErrorText/ErrorText";
 import { FormInputLine } from "../FormInputLine";
 import Select from "react-select";
@@ -21,6 +21,7 @@ export function AddSong() {
 
     const artistName = useWatch({ control, name: "artist_name" });
     const originalTitle = useWatch({ control, name: "orig_title" });
+    const youtubeVideoId = useWatch({ control, name: "yt_id" });
     const [ytVids, setYTVids] = useState<YouTubeVideoDetails[]>([]);
     const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
     const [youtubeError, setYoutubeError] = useState<string | null>(null);
@@ -66,6 +67,10 @@ export function AddSong() {
     // for uploading cover image
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [coverInputKey, setCoverInputKey] = useState(0);
+    const [useYoutubeThumbnail, setUseYoutubeThumbnail] = useState(false);
+
+    const selectedYoutubeVideo = ytVids.find((video) => video.id.videoId === youtubeVideoId);
+    const youtubeThumbnailUrl = selectedYoutubeVideo?.snippet.thumbnails?.medium?.url ?? null;
 
     useEffect(() => {
         const getArtists = async() => {
@@ -165,9 +170,15 @@ export function AddSong() {
             return;
         }
 
-        // upload cover image to supabase storage
+        // Use the selected video's thumbnail directly when requested.
         let imageUrl: string | null = null;
-        if (coverImage) {
+        if (useYoutubeThumbnail) {
+            imageUrl = youtubeThumbnailUrl;
+            if (imageUrl === null) {
+                setSubmissionStatus({ type: "error", message: "The YouTube thumbnail could not be found. Please select a YouTube video first." });
+                return;
+            }
+        } else if (coverImage) {
             imageUrl = await uploadImage(coverImage);
             if (imageUrl === null) {
                 setSubmissionStatus({ type: "error", message: "The cover image could not be uploaded. Please try again." });
@@ -188,6 +199,7 @@ export function AddSong() {
         setIsArtistEnglishNameDisabled(false);
         setCoverImage(null);
         setCoverInputKey((key) => key + 1);
+        setUseYoutubeThumbnail(false);
         setSubmissionStatus({ type: "success", message: successMessage });
         console.log("ADDED NEW SONG", data);
     }
@@ -196,6 +208,15 @@ export function AddSong() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setCoverImage(e.target.files[0])
+        }
+    }
+
+    // set cover image to be youtube thumbnail
+    const handleThumbnailToggle = (checked: boolean) => {
+        setUseYoutubeThumbnail(checked);
+        if (checked) {
+            setCoverImage(null);
+            setCoverInputKey((key) => key + 1);
         }
     }
 
@@ -323,15 +344,7 @@ export function AddSong() {
                         placeholder="Enter name of album"
                         disabled={isSubmitting}
                     />
-                    <FormInputLine 
-                        register={register} 
-                        errors={errors}
-                        label="Youtube Video ID" 
-                        field="yt_id" 
-                        placeholder="Select correct audio or enter YouTube video id"
-                        disabled={isSubmitting}
-                    />
-                    <div className="form-select-container">
+                    <div className={`form-select-container ${useYoutubeThumbnail ? "cover-image-disabled" : ""}`}>
                         <p className="form-label">Cover Image</p>
                         <div className="file-input-wrapper">
                             <input 
@@ -341,7 +354,7 @@ export function AddSong() {
                                 type="file"
                                 accept="image/*" 
                                 onChange={handleFileChange}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || useYoutubeThumbnail}
                             />
                             <label className="file-input-label" htmlFor="cover-image-input">
                                 <span className={!coverImage ? "file-input-placeholder" : undefined}>
@@ -350,10 +363,29 @@ export function AddSong() {
                                 <FiUpload className="file-input-icon" aria-hidden="true" />
                             </label>
                         </div>
+                        <FormControlLabel
+                            className="form-checkbox-label"
+                            control={
+                                <Checkbox
+                                    checked={useYoutubeThumbnail}
+                                    onChange={(event) => handleThumbnailToggle(event.target.checked)}
+                                    disabled={isSubmitting}
+                                />
+                            }
+                            label="Use YT thumbnail as cover image" />
                     </div>
+
+                    <FormInputLine 
+                        register={register} 
+                        errors={errors}
+                        label="Youtube Video ID" 
+                        field="yt_id" 
+                        placeholder="Select correct audio or enter YouTube video id"
+                        disabled={isSubmitting}
+                    />
                     {hasYoutubeSearchFields && (
                         <Button
-                            className="submit-button youtube-search-button"
+                            className="youtube-search-button"
                             type="button"
                             onClick={getYoutubeResults}
                             disabled={isSubmitting || isYoutubeLoading}
@@ -363,7 +395,6 @@ export function AddSong() {
                         </Button>
                     )}
                 </div>
-                {/* conditionally show secondary section after inputting artist name and song title debounced with  */}
                 <div className="form-secondary-section">
                     {hasYoutubeSearchFields && (
                         <>
@@ -382,7 +413,7 @@ export function AddSong() {
                 </div>
             </form>
             <Button
-                className="submit-button"
+                className="submit-button add-song-submit-button"
                 type="submit"
                 loading={isSubmitting}
                 loadingIndicator={

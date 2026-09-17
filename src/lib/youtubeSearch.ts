@@ -178,11 +178,7 @@ export function scoreYouTubeResult(
   let score = 0;
 
   if (title.includes(expectedTitle)) score += 50;
-  if (title.includes(expectedArtist)) score += 40;
-
-  // Prefer audio-focused uploads
-  if (title.includes("official audio")) score += 20;
-  if (title.includes("audio")) score += 15;
+  if (title.includes(expectedArtist)) score += 20;
 
   // Prefer official releases
   if (title.includes("official")) score += 10;
@@ -203,5 +199,4 @@ export function scoreYouTubeResult(
   if (title.includes("music video")) score -= 10;
 
   return score;
-  // return 100;
 }
