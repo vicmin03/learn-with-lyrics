@@ -1,6 +1,6 @@
 # Learn With Lyrics
 
-Deployed on Vercel: https://learn-with-lyrics-cx4jkv4e3-me-c67f99fd.vercel.app/
+Deployed on Vercel: https://learn-with-lyrics-cknt3eudf-me-c67f99fd.vercel.app/
 
 Learn With Lyrics is a web app for learning Chinese through music. Browse a song collection, read synced lyrics, look up new vocabulary, and listen to songs while following along.
 
