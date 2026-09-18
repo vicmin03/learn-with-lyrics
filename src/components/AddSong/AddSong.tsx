@@ -108,7 +108,6 @@ export function AddSong() {
             return null;
         }
         if (result?.data) {
-            console.log("ADDED NEW ARTIST: ", result.data);
             return result.data.artist_id;
         }
         return null;
@@ -201,7 +200,6 @@ export function AddSong() {
         setCoverInputKey((key) => key + 1);
         setUseYoutubeThumbnail(false);
         setSubmissionStatus({ type: "success", message: successMessage });
-        console.log("ADDED NEW SONG", data);
     }
 
     // handle uploading images

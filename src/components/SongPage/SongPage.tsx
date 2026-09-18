@@ -259,7 +259,6 @@ export default function SongPage() {
                 }, controller.signal);
                 setSongLyrics(result.lyrics);
                 setHasTimestamps(result.hasTimestamps);
-                console.log("LYRICS: ", result)
             } catch {
                 if (!controller.signal.aborted) {
                     setErrorMessage('Unable to load lyrics right now.');
