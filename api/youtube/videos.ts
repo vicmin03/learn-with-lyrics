@@ -26,10 +26,19 @@ export default async function handler(
         });
     }
 
+    const apiKey = process.env.YT_DATA_API_KEY;
+
+    if (!apiKey) {
+        console.error("YOUTUBE_API_KEY is not configured");
+        return res.status(500).json({
+        error: "YouTube API is not configured",
+        });
+    }
+
     const params = new URLSearchParams({
         part: "contentDetails",
         id: videoIds.join(","),
-        key: process.env.YOUTUBE_API_KEY!,
+        key: apiKey,
     });
 
     const response = await fetch(

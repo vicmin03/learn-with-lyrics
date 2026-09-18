@@ -19,12 +19,21 @@ export default async function handler(
         });
     }
 
+    const apiKey = process.env.YT_DATA_API_KEY;
+
+    if (!apiKey) {
+        console.error("YOUTUBE_API_KEY is not configured");
+        return res.status(500).json({
+        error: "YouTube API is not configured",
+        });
+    }
+
     const params = new URLSearchParams({
         part: "snippet",
         q: `${artist} ${title} official audio`,
         type: "video",
         maxResults: MAX_RESULTS,
-        key: process.env.YOUTUBE_API_KEY ?? "",
+        key: apiKey,
         videoCategoryId: "10",
         videoEmbeddable: "true",
         videoSyndicated: "true",
