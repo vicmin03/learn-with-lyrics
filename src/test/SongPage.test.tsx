@@ -237,4 +237,96 @@ describe('Song Page', () => {
         expect(scriptToggle).not.toBeChecked();
         expect(await screen.findByText('愛')).toBeInTheDocument();
     });
+
+    test('translates each lyric line only after the translation toggle is enabled', async () => {
+        const fetchMock = vi.fn().mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+            if (init?.method === 'POST') {
+                const body = JSON.parse(String(init.body)) as { text: string };
+                return {
+                    ok: true,
+                    json: async () => ({ translatedText: `English: ${body.text}` }),
+                };
+            }
+
+            return {
+                ok: true,
+                json: async () => mockedLyricsResponse,
+            };
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/songs/1"]}>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/songs/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText('Hello')).toBeInTheDocument();
+        expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(0);
+
+        await userEvent.click(screen.getAllByRole('switch')[2]);
+
+        expect(await screen.findByText('English: Hello first line')).toBeInTheDocument();
+        expect(screen.getByText('English: Second line here')).toBeInTheDocument();
+        expect(screen.getByText('English: Final line')).toBeInTheDocument();
+
+        const translationCalls = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+        expect(translationCalls).toHaveLength(3);
+        expect(translationCalls.map(([, init]) => JSON.parse(String(init?.body)).text)).toEqual([
+            'Hello first line',
+            'Second line here',
+            'Final line',
+        ]);
+    });
+
+    test('deduplicates repeated lines and skips blank lines when translating', async () => {
+        const lyricsWithDuplicates = {
+            data: {
+                hasTimestamps: false,
+                lyrics: '你好\n\n你好\n再见',
+            },
+        };
+        const fetchMock = vi.fn().mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+            if (init?.method === 'POST') {
+                const body = JSON.parse(String(init.body)) as { text: string };
+                return {
+                    ok: true,
+                    json: async () => ({ translatedText: `English: ${body.text}` }),
+                };
+            }
+
+            return {
+                ok: true,
+                json: async () => lyricsWithDuplicates,
+            };
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/songs/1"]}>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/songs/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
+            </MemoryRouter>
+        );
+
+        expect((await screen.findAllByText('你好')).length).toBe(2);
+        await userEvent.click(screen.getAllByRole('switch')[2]);
+
+        expect((await screen.findAllByText('English: 你好')).length).toBe(2);
+        expect(screen.getByText('English: 再见')).toBeInTheDocument();
+
+        const translationCalls = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+        expect(translationCalls).toHaveLength(2);
+        expect(translationCalls.map(([, init]) => JSON.parse(String(init?.body)).text)).toEqual([
+            '你好',
+            '再见',
+        ]);
+    });
 });

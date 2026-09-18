@@ -24,6 +24,7 @@ function App() {
 
           <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/learn-with-lyrics" element={<Home />} />
               <Route path="/songs/:song_id" element={<SongPage />}/>       
               <Route path="*" element={<NotFound />} />
 

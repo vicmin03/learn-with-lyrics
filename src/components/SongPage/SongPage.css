@@ -1,8 +1,8 @@
 .song-lyrics {
   font-size: 2.5rem;
-  margin: 1.5rem 3rem;
+  margin: 0.75rem 3rem;
   text-align: left;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .song-page-header {
@@ -86,9 +86,10 @@
 
   .song-lyrics {
     font-size: 2rem;
-    margin: 1rem;
+    margin: 0.5rem 1rem;
   }
 }
+
 
 #pronunciation-label {
   font-weight: bold;
@@ -96,4 +97,42 @@
 
 #script-label {
   font-weight: bold;
+}
+
+#translation-label {
+  font-weight: bold;
+}
+
+.lyrics-columns {
+  width: 100%;
+}
+
+.lyrics-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.lyrics-row > .song-lyrics {
+  min-width: 0;
+}
+
+.translated-lyric {
+  font-size: 1.5rem;
+  margin: 2rem 0;
+  color: var(--text);
+}
+
+.translated-lyric.active {
+  color: var(--accent-border);
+}
+
+@media (max-width: 700px) {
+  .lyrics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .lyrics-row > .translated-lyric {
+    border-top: 1px solid var(--border);
+  }
 }

@@ -138,6 +138,36 @@ describe('Lyrics', () => {
         expect(screen.getByRole('button', { name: 'First' })).toHaveClass('active');
     });
 
+    test('renders translated lyrics in the matching row and highlights the active row', async () => {
+        const lyrics = [
+            { id: 'lrc_0', start_time: 0, text: '你好' },
+            { id: 'lrc_1', start_time: 1000, text: '再见' },
+        ];
+
+        render(
+            <Lyrics
+                activeIndex={1}
+                lyrics={lyrics}
+                showPronunciation={false}
+                simplifiedCharacters={true}
+                origScript="cn"
+                onLookup={vi.fn()}
+                showTranslation={true}
+                translatedLyrics={['Hello', 'Goodbye']}
+            />
+        );
+
+        expect(await screen.findByText('Hello')).toBeInTheDocument();
+        expect(screen.getByText('Goodbye')).toBeInTheDocument();
+
+        const rows = document.querySelectorAll('.lyrics-row');
+        expect(rows).toHaveLength(2);
+        expect(rows[0]).toHaveTextContent('你好Hello');
+        expect(rows[1]).toHaveTextContent('再见Goodbye');
+        expect(rows[0].querySelector('.translated-lyric')).toHaveClass('active');
+        expect(rows[1].querySelector('.translated-lyric')).toHaveClass('active');
+    });
+
     test('scrolls the active lyric into the center of the page', async () => {
         const scrollIntoView = vi.fn();
         HTMLElement.prototype.scrollIntoView = scrollIntoView;

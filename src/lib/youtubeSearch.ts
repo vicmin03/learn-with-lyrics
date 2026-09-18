@@ -1,6 +1,3 @@
-const API_KEY = import.meta.env.VITE_YT_DATA_API_KEY;
-const MAX_RESULTS = "8";
-
 export type YouTubeSearchResult = {
   id: {
     kind: string;
@@ -75,7 +72,6 @@ export async function fetchVideoIds(artist: string, title: string) {
         }))
         .sort((a: scoredVideo, b: scoredVideo) => b.score - a.score); 
 
-    console.log(ranked);
     return ranked.map(({ result }) => result);
 }
 
@@ -117,43 +113,29 @@ export async function fetchVideoDetails(artist: string, title: string) {
 
 // function to fetch youtube video ID from song artist and title query
 async function searchYoutube(artist: string, title: string): Promise<YouTubeSearchResult[]> {
-    const params = new URLSearchParams({
-        part: "snippet",
-        q: `${artist} ${title} official audio`,
-        type: "video",
-        maxResults: MAX_RESULTS,
-        key: API_KEY,
-        videoCategoryId: "10",
-        videoEmbeddable: "true",
-        videoSyndicated: "true",
-    })
-    const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?${params}`
-    )
+  const params = new URLSearchParams({ artist, title });
+  const response = await fetch(`/api/youtube/search?${params}`);
     if (!response.ok) {
         throw new Error(`YouTube API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.items;
+    return response.json();
 };
 
 // function to fetch youtube video content details with call to videos/list
 async function getVideoDetails(videoIds: string[]): Promise<YouTubeContentDetails[]> {
     const params = new URLSearchParams({
-        part: "contentDetails",
-        id: videoIds.toString(),
-        key: API_KEY
-    })
-    const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos/?${params}`
-    )
+      ids: videoIds.join(","),
+    });
+
+    // send request to api endpoint to secure api keys
+    const response = await fetch(`/api/youtube/videos?${params}`);
+
     if (!response.ok) {
-        throw new Error(`YouTube API error: ${response.status}`);
+      throw new Error(`YouTube API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.items;
+    return response.json();
 }
 
 // function to score youtube results in order of relevance to extract best audio for song
