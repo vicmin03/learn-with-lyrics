@@ -16,7 +16,11 @@ interface LyricsProps {
     showPronunciation: boolean,
     simplifiedCharacters: boolean,
     origScript: string,
-    onLookup: (word: string, trigger: HTMLElement) => void
+    onLookup: (word: string, trigger: HTMLElement) => void,
+    showTranslation?: boolean,
+    translatedLyrics?: string[],
+    isTranslationLoading?: boolean,
+    translationError?: string | null,
 }
 
 function isWhitespace(token: ScriptToken) {
@@ -24,7 +28,7 @@ function isWhitespace(token: ScriptToken) {
 }
 
 
-export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup }: LyricsProps) {
+export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedCharacters, origScript, onLookup, showTranslation = false, translatedLyrics = [], isTranslationLoading = false, translationError = null }: LyricsProps) {
     const [tokenizedLyrics, setTokenizedLyrics] = useState<TokenizedLyric[]>([]);
 
     const refContainer = useRef<HTMLParagraphElement | null>(null);
@@ -102,40 +106,52 @@ export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedChara
     return (
         <div>
             {tokenizedLyrics.map((line, index) => (
-                <p
-                    key={line.id}
-                    className="song-lyrics"
-                    ref={index === activeIndex ? refContainer : null}
-                >
-                    {line.tokens.map((token) => {
-                        if (isWhitespace(token)) {
-                            return " ";
-                        }
+                <div className={showTranslation ? "lyrics-row" : undefined} key={line.id}>
+                    <p
+                        className="song-lyrics"
+                        ref={index === activeIndex ? refContainer : null}
+                    >
+                        {line.tokens.map((token) => {
+                            if (isWhitespace(token)) {
+                                return " ";
+                            }
 
-                        const displayedWord = simplifiedCharacters
-                            ? token.simplified
-                            : token.traditional;
+                            const displayedWord = simplifiedCharacters
+                                ? token.simplified
+                                : token.traditional;
 
-                        return (
-                            <span
-                                key={`${line.id}-${token.start}`}
-                                className="lyrics-token-container"
-                            >
-                                {showPronunciation && <span className="pronunciation-text" lang="zh-Latn">
-                                    {token.pinyin}
-                                </span>}
-                                <button
-                                    type="button"
-                                    className={index <= activeIndex ? "lyrics-token active" : "lyrics-token"}
-                                    lang="zh"
-                                    onClick={(event) => handleLookup(displayedWord, event.currentTarget)}>
-                                    {displayedWord}                                
-                                </button>
-                            </span>
-                            )   
-                        }
+                            return (
+                                <span
+                                    key={`${line.id}-${token.start}`}
+                                    className="lyrics-token-container"
+                                >
+                                    {showPronunciation && <span className="pronunciation-text" lang="zh-Latn">
+                                        {token.pinyin}
+                                    </span>}
+                                    <button
+                                        type="button"
+                                        className={index <= activeIndex ? "lyrics-token active" : "lyrics-token"}
+                                        lang="zh"
+                                        onClick={(event) => handleLookup(displayedWord, event.currentTarget)}>
+                                        {displayedWord}
+                                    </button>
+                                </span>
+                            );
+                        })}
+                    </p>
+                    {showTranslation && (
+                        <p
+                            className={index <= activeIndex ? "song-lyrics translated-lyric active" : "song-lyrics translated-lyric"}
+                            lang="en"
+                        >
+                            {isTranslationLoading && !translatedLyrics[index]
+                                ? "Translating..."
+                                : translationError && !translatedLyrics[index]
+                                    ? translationError
+                                    : translatedLyrics[index] ?? ""}
+                        </p>
                     )}
-                </p>
+                </div>
             ))
             }
         </div>

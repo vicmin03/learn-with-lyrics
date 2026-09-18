@@ -83,6 +83,13 @@ export default function SongPage() {
         setSimplifiedCharacters,
     } = useSettings();
 
+    // settings for toggling english translation
+    const [translateLyrics, setTranslateLyrics] = useState(false);
+    const [translatedLyrics, setTranslatedLyrics] = useState<string[]>([]);
+    const [isTranslationLoading, setIsTranslationLoading] = useState(false);
+    const [translationError, setTranslationError] = useState<string | null>(null);
+    const translationCacheRef = useRef(new Map<string, string>());
+
     const youtube = useYouTubePlayer();
 
     // to close vocab pop up box
@@ -100,6 +107,84 @@ export default function SongPage() {
     const toggleSimplified = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSimplifiedCharacters(event.target.checked);
     }
+
+    // to toggle showing english translation of lyrics
+    const toggleTranslate = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTranslateLyrics(event.target.checked);
+    }
+
+    useEffect(() => {
+        if (!translateLyrics || songLyrics.length === 0) {
+            return;
+        }
+
+        const controller = new AbortController();
+        const maxConcurrentRequests = 3;
+
+        async function translateLyricsByLine() {
+            setIsTranslationLoading(true);
+            setTranslationError(null);
+
+            try {
+                const currentTranslations = songLyrics.map((line) =>
+                    translationCacheRef.current.get(line.text) ?? ''
+                );
+                const pendingLines = Array.from(
+                    new Map(
+                        songLyrics
+                            .map((line) => line.text.trim() ? line : null)
+                            .filter((line): line is LyricsDict => line !== null)
+                            .filter((line) => !translationCacheRef.current.has(line.text))
+                            .map((line) => [line.text, line])
+                    ).values()
+                );
+
+                setTranslatedLyrics(currentTranslations);
+
+                for (let start = 0; start < pendingLines.length; start += maxConcurrentRequests) {
+                    const batch = pendingLines.slice(start, start + maxConcurrentRequests);
+                    const translatedBatch = await Promise.all(batch.map(async (line) => {
+                        const response = await fetch('/api/translate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: line.text, target: 'en' }),
+                            signal: controller.signal,
+                        });
+
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data.error || 'Translation failed');
+                        }
+
+                        const data = await response.json();
+                        return { source: line.text, translation: data.translatedText as string };
+                    }));
+
+                    translatedBatch.forEach(({ source, translation }) => {
+                        translationCacheRef.current.set(source, translation);
+                    });
+
+                    if (!controller.signal.aborted) {
+                        setTranslatedLyrics(songLyrics.map((line) =>
+                            translationCacheRef.current.get(line.text) ?? ''
+                        ));
+                    }
+                }
+            } catch (error) {
+                if (!controller.signal.aborted) {
+                    setTranslationError(error instanceof Error ? error.message : 'Translation failed');
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setIsTranslationLoading(false);
+                }
+            }
+        }
+
+        translateLyricsByLine();
+
+        return () => controller.abort();
+    }, [songLyrics, translateLyrics]);
 
     // fetch youtube url to display video embed on initial render
     useEffect(() => {
@@ -174,7 +259,6 @@ export default function SongPage() {
                 }, controller.signal);
                 setSongLyrics(result.lyrics);
                 setHasTimestamps(result.hasTimestamps);
-                console.log("LYRICS: ", result)
             } catch {
                 if (!controller.signal.aborted) {
                     setErrorMessage('Unable to load lyrics right now.');
@@ -303,28 +387,44 @@ export default function SongPage() {
                         onChange = {toggleSimplified} 
                     />
                     <span id="script-state">{simplifiedCharacters ? 'Simplified' : 'Traditional'}</span>
+
+
+                    <span id="translation-label">Show Translation</span>
+                    <Switch 
+                        aria-labelledby="translation-label translation-state"
+                        checked = {translateLyrics} 
+                        onChange = {toggleTranslate} 
+                    />
+                    <span id="translate-state">{translateLyrics ? 'On' : 'Off'}</span>
                 </fieldset>
             </header>
 
             <section className="song-page-main" aria-labelledby="lyrics-heading">
                 <h2 id="lyrics-heading" className="visually-hidden">Lyrics</h2>
-                {isLoading ? (
-                    <p role="status" aria-live="polite">Loading lyrics...</p>
-                ) : errorMessage ? (
-                    <p role="alert">{errorMessage}</p>
-                ) : songLyrics.length === 0 ? (
-                    <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
-                ) : (
-                    <>
+                <div className="lyrics-columns">
+                    {isLoading ? (
+                        <p role="status" aria-live="polite">Loading lyrics...</p>
+                    ) : errorMessage ? (
+                        <p role="alert">{errorMessage}</p>
+                    ) : songLyrics.length === 0 ? (
+                        <p role="status" aria-live="polite">Lyrics are not available for this song.</p>
+                    ) : (
                         <Lyrics 
                             activeIndex={activeIndex}
                             lyrics={songLyrics} 
                             showPronunciation={showPronunciation} 
                             simplifiedCharacters={simplifiedCharacters} 
                             origScript={songInfo.orig_script} 
-                            onLookup={handleLookup} />
-                    </>
-                )}
+                            onLookup={handleLookup}
+                            showTranslation={translateLyrics}
+                            translatedLyrics={translatedLyrics}
+                            isTranslationLoading={isTranslationLoading}
+                            translationError={translationError}
+                        />
+                    )}
+                </div>
+
+
 
                 {vocabWord && (
                     <VocabInfo
