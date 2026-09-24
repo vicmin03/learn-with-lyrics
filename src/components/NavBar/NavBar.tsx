@@ -54,6 +54,13 @@ export default function Navbar() {
         setShowSearch(true);
     }
 
+    const closeSearch = () => {
+        setShowSearch(false);
+        setSearchText("");
+        setDebouncedSearchText("");
+        setSongList([]);
+    }
+
     useEffect(() => {
         if (!showSearch) {
             return;
@@ -64,8 +71,7 @@ export default function Navbar() {
                 searchContainerRef.current &&
                 !searchContainerRef.current.contains(event.target as Node)
             ) {
-                setShowSearch(false);
-                setSearchText("");
+                closeSearch();
             }
         };
 
@@ -188,7 +194,11 @@ export default function Navbar() {
                 { (searchText && songList && songList.length > 0) && (
                     <MenuList className="nav-search-results">
                         {songList.map((song) => (
-                            <Link to={`/songs/${song.song_id}`} className="card-link">
+                            <Link
+                                to={`/songs/${song.song_id}`}
+                                className="card-link"
+                                onClick={closeSearch}
+                            >
                                 <MenuItem 
                                     key={song.song_id}
                                     className="song-result">
