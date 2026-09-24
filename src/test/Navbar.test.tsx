@@ -30,6 +30,18 @@ describe('Navbar', () => {
         expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
     });
 
+    test('closes the search bar when clicking outside it', async () => {
+        const user = userEvent.setup();
+        renderNavbar();
+
+        await user.click(screen.getByRole('button', { name: 'Search' }));
+        expect(screen.getByRole('textbox', { name: 'search-bar' })).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Languages' }));
+
+        expect(screen.queryByRole('textbox', { name: 'search-bar' })).not.toBeInTheDocument();
+    });
+
     test('opens the login form when the Log In button is clicked', async () => {
         const user = userEvent.setup();
         renderNavbar();
