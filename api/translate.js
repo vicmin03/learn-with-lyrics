@@ -9,13 +9,6 @@ const translate = new Translate({
 });
 
 export default async function handler(req, res) {
-    if (req.method == "GET"){
-        const [translation] = await translate.translate("北京早安。我现在有冰淇淋", {
-            to: "en"
-        }) 
-        return res.status(200).json({translatedText: translation})
-    }
-
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
