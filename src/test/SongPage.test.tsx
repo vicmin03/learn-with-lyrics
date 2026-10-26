@@ -9,14 +9,42 @@ import {
 import mockedSongs from './fixtures/song_list_fixture';
 import { SettingsProvider } from '../contexts/SettingsProvider';
 
-const { supabaseFromMock, supabaseEqMock, supabaseSingleMock } = vi.hoisted(() => {
+const {
+    supabaseFromMock,
+    supabaseSelectMock,
+    supabaseSingleMock,
+    supabaseSavedTranslationsMock,
+    supabaseUpdateMock,
+    supabaseUpdateMaybeSingleMock,
+} = vi.hoisted(() => {
     const supabaseSingleMock = vi.fn();
-    const supabaseEqMock = vi.fn(() => ({ single: supabaseSingleMock }));
+    const supabaseSavedTranslationsMock = vi.fn();
+    const supabaseSelectMock = vi.fn((columns: string) => ({
+        eq: vi.fn(() => ({
+            single: columns === '*' ? supabaseSingleMock : supabaseSavedTranslationsMock,
+        })),
+    }));
+    const supabaseUpdateMaybeSingleMock = vi.fn();
+    const supabaseUpdateSelectMock = vi.fn(() => ({
+        maybeSingle: supabaseUpdateMaybeSingleMock,
+    }));
+    const supabaseUpdateEqMock = vi.fn(() => ({
+        select: supabaseUpdateSelectMock,
+    }));
+    const supabaseUpdateMock = vi.fn(() => ({ eq: supabaseUpdateEqMock }));
     const supabaseFromMock = vi.fn(() => ({
-        select: vi.fn(() => ({ eq: supabaseEqMock })),
+        select: supabaseSelectMock,
+        update: supabaseUpdateMock,
     }));
 
-    return { supabaseFromMock, supabaseEqMock, supabaseSingleMock };
+    return {
+        supabaseFromMock,
+        supabaseSelectMock,
+        supabaseSingleMock,
+        supabaseSavedTranslationsMock,
+        supabaseUpdateMock,
+        supabaseUpdateMaybeSingleMock,
+    };
 });
 
 vi.mock('../lib/supabaseClient', () => ({
@@ -55,16 +83,28 @@ const { default: SongPage } = await import('../components/SongPage/SongPage');
 describe('Song Page', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
+        vi.clearAllMocks();
         supabaseFromMock.mockReturnValue({
-            select: vi.fn(() => ({ eq: supabaseEqMock })),
+            select: supabaseSelectMock,
+            update: supabaseUpdateMock,
         });
-        supabaseEqMock.mockReturnValue({
-            single: supabaseSingleMock,
-        });
+        supabaseSelectMock.mockImplementation((columns: string) => ({
+            eq: vi.fn(() => ({
+                single: columns === '*' ? supabaseSingleMock : supabaseSavedTranslationsMock,
+            })),
+        }));
         supabaseSingleMock.mockImplementation(async () => ({
             data: mockedSongs[0],
             error: null,
         }));
+        supabaseSavedTranslationsMock.mockResolvedValue({
+            data: { translated_lyrics: null },
+            error: null,
+        });
+        supabaseUpdateMaybeSingleMock.mockResolvedValue({
+            data: { song_id: 1 },
+            error: null,
+        });
     });
 
     afterEach(() => {
@@ -281,6 +321,48 @@ describe('Song Page', () => {
             'Second line here',
             'Final line',
         ]);
+        await waitFor(() => {
+            expect(supabaseUpdateMock).toHaveBeenCalledWith({
+                translated_lyrics: [
+                    'English: Hello first line',
+                    'English: Second line here',
+                    'English: Final line',
+                ],
+            });
+        });
+    });
+
+    test('uses saved translations without calling the translation API', async () => {
+        supabaseSavedTranslationsMock.mockResolvedValue({
+            data: {
+                translated_lyrics: ['Saved translation one', 'Saved translation two', 'Saved translation three'],
+            },
+            error: null,
+        });
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => mockedLyricsResponse,
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/songs/1"]}>
+                <SettingsProvider>
+                    <Routes>
+                        <Route path="/songs/:song_id" element={<SongPage />} />
+                    </Routes>
+                </SettingsProvider>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText('Hello')).toBeInTheDocument();
+        await userEvent.click(screen.getAllByRole('switch')[2]);
+
+        expect(await screen.findByText('Saved translation one')).toBeInTheDocument();
+        expect(screen.getByText('Saved translation two')).toBeInTheDocument();
+        expect(screen.getByText('Saved translation three')).toBeInTheDocument();
+        expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(0);
+        expect(supabaseUpdateMock).not.toHaveBeenCalled();
     });
 
     test('deduplicates repeated lines and skips blank lines when translating', async () => {

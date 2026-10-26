@@ -105,6 +105,9 @@ export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedChara
 
     return (
         <div>
+            {showTranslation && translationError && (
+                <p role="alert">{translationError}</p>
+            )}
             {tokenizedLyrics.map((line, index) => (
                 <div className={showTranslation ? "lyrics-row" : undefined} key={line.id}>
                     <p
@@ -146,9 +149,7 @@ export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedChara
                         >
                             {isTranslationLoading && !translatedLyrics[index]
                                 ? "Translating..."
-                                : translationError && !translatedLyrics[index]
-                                    ? translationError
-                                    : translatedLyrics[index] ?? ""}
+                                : translatedLyrics[index] ?? ""}
                         </p>
                     )}
                 </div>
@@ -158,4 +159,3 @@ export function Lyrics({ activeIndex, lyrics, showPronunciation, simplifiedChara
         
     );
 }
-

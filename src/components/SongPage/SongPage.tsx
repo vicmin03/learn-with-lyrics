@@ -114,10 +114,11 @@ export default function SongPage() {
     }
 
     useEffect(() => {
-        if (!translateLyrics || songLyrics.length === 0) {
+        if (!translateLyrics || songLyrics.length === 0 || !songInfo) {
             return;
         }
 
+        const songId = songInfo.song_id;
         const controller = new AbortController();
         const maxConcurrentRequests = 3;
 
@@ -125,7 +126,41 @@ export default function SongPage() {
             setIsTranslationLoading(true);
             setTranslationError(null);
 
+            // try and fetch saved translated lyrics from database first
             try {
+                if (!supabase) {
+                    throw new Error('Saved translations are unavailable because the database is not configured.');
+                }
+                const { data: savedData, error: savedError } = await supabase
+                    .from('Songs')
+                    .select('translated_lyrics')
+                    .eq('song_id', songId)
+                    .single();
+
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                if (savedError) {
+                    console.error('Failed to load saved translations:', savedError);
+                    throw new Error('Unable to load saved translations right now.');
+                }
+
+                const savedTranslations: unknown = savedData?.translated_lyrics;
+                if (
+                    Array.isArray(savedTranslations)
+                    && savedTranslations.length === songLyrics.length
+                    && savedTranslations.every((translation): translation is string => typeof translation === 'string')
+                ) {
+                    songLyrics.forEach((line, index) => {
+                        if (line.text.trim()) {
+                            translationCacheRef.current.set(line.text, savedTranslations[index]);
+                        }
+                    });
+                    setTranslatedLyrics(savedTranslations);
+                    return;
+                }
+                // if no lyrics saved in db, send requests to translate lines and then save
                 const currentTranslations = songLyrics.map((line) =>
                     translationCacheRef.current.get(line.text) ?? ''
                 );
@@ -138,7 +173,7 @@ export default function SongPage() {
                             .map((line) => [line.text, line])
                     ).values()
                 );
-
+                
                 setTranslatedLyrics(currentTranslations);
 
                 for (let start = 0; start < pendingLines.length; start += maxConcurrentRequests) {
@@ -170,6 +205,25 @@ export default function SongPage() {
                         ));
                     }
                 }
+
+                if (!controller.signal.aborted) {
+                    const translationsToSave = songLyrics.map((line) =>
+                        translationCacheRef.current.get(line.text) ?? ''
+                    );
+                    const { data: updatedSong, error: saveError } = await supabase
+                        .from('Songs')
+                        .update({ translated_lyrics: translationsToSave })
+                        .eq('song_id', songId)
+                        .select('song_id')
+                        .maybeSingle();
+                    if (saveError) {
+                        console.error('Failed to save translations:', saveError);
+                        setTranslationError('Translations were loaded, but could not be saved for future use.');
+                    } else if (!updatedSong) {
+                        console.error(`No song row was updated for song_id ${songId}. Check the row and its UPDATE policy.`);
+                        setTranslationError('Translations loaded, but no song row was updated. Check the song ID and database update permissions.');
+                    }
+                }
             } catch (error) {
                 if (!controller.signal.aborted) {
                     setTranslationError(error instanceof Error ? error.message : 'Translation failed');
@@ -184,7 +238,7 @@ export default function SongPage() {
         translateLyricsByLine();
 
         return () => controller.abort();
-    }, [songLyrics, translateLyrics]);
+    }, [songInfo, songLyrics, translateLyrics]);
 
     // fetch youtube url to display video embed on initial render
     useEffect(() => {
